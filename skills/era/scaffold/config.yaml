@@ -1,0 +1,31 @@
+# ERA / FUTS search configuration. Copy this scaffold to a working dir and edit.
+
+# --- problem ---------------------------------------------------------------
+problem_module: problem        # importable module exposing get_problem() -> (Problem, Solution, float|None)
+
+# --- search ----------------------------------------------------------------
+num_iterations: 20             # total candidates generated+executed
+batch_size: 4                  # candidates per round; >1 => batched_search (concurrent SLURM jobs)
+c_puct: 1.0                    # explore/exploit. lower -> greedier, higher -> more breadth
+portfolio_k: 5                 # how many diverse winners to report
+
+# --- generator (subscription-authed CLI, never a metered API) -------------
+backend: claude                # active backend at start
+claude_model: opus             # latest Opus alias
+cursor_model: composer         # latest Composer (failover when Claude is rate-limited)
+fallback: true                 # auto-switch claude -> cursor on session-limit, revert after cooldown
+cooldown_s: 1800               # stay on cursor this long after a Claude limit, then re-probe
+generate_timeout_s: 600        # per-generation hard timeout
+
+# --- executor --------------------------------------------------------------
+exec_mode: sbatch_per_run      # sbatch_per_run (default) | interactive
+python: ""                     # interpreter for each candidate ("" -> the runner's sys.executable)
+# SLURM knobs (sbatch_per_run only). Leave account/gres "" to omit those #SBATCH lines.
+account: ""                    # e.g. def-xxxx_gpu
+gres: ""                       # e.g. gpu:1  (or your cluster's exact GPU spec)
+cpus: 2
+mem: 4G
+time_limit: "0:30:00"          # short per-run walltime (>= one run's budget + margin)
+setup_cmds:                    # shell lines run before the program (env activation, modules)
+  []                           # e.g. ["module load python", "source ~/venv/bin/activate"]
+max_wall_s: 5400               # interactive-mode subprocess ceiling

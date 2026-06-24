@@ -1,0 +1,13 @@
+This repository is licensed under the MIT License (see LICENSE), with the
+following exception:
+
+  skills/era/scaffold/futs.py
+    Vendored verbatim from google-research/era (implementation/futs.py,
+    commit eb56676ce0a9b22b0c357c218de09ac61e94fc4b).
+    Copyright 2026 Google LLC.
+    Licensed under the Apache License, Version 2.0.
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    The full Apache-2.0 license header is preserved at the top of that file.
+    The rest of the `era` skill (scaffold and SKILL.md) is original work
+    licensed under MIT.
