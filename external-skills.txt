@@ -13,3 +13,13 @@
 mattpocock/skills    skills/productivity/              # grill-me, grilling, handoff, teach, writing-great-skills
 mattpocock/skills    skills/personal/obsidian-vault    # obsidian vault note management
 vercel-labs/skills   skills/find-skills                # discover & install more skills
+
+# gstack (garrytan/gstack) — selected general-purpose skills (work standalone;
+# their gstack/bin preamble no-ops without the gstack runtime)
+garrytan/gstack      investigate           # systematic debugging / root-cause analysis
+garrytan/gstack      spec                  # turn vague intent into an executable spec
+garrytan/gstack      make-pdf              # markdown -> publication-quality PDF
+garrytan/gstack      diagram               # english/mermaid -> diagram triplet
+garrytan/gstack      careful               # warn before destructive shell commands
+garrytan/gstack      review                # pre-landing PR review
+garrytan/gstack      design-consultation   # research landscape + propose a design direction
