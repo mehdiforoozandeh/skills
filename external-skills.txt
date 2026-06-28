@@ -1,0 +1,15 @@
+# External skills manifest — source of truth for skills I don't own.
+#
+# Format (whitespace-separated):
+#   owner/repo   subpath   # optional comment
+#
+#   subpath ending in "/"  -> install every subfolder that contains a SKILL.md
+#   subpath without "/"    -> install that single skill folder
+#
+# All entries track the repo's default branch (main). Re-running install.sh
+# pulls the latest. Remove a line to stop installing it on FUTURE machines —
+# install.sh never deletes existing links (run with care / unlink by hand).
+
+mattpocock/skills    skills/productivity/              # grill-me, grilling, handoff, teach, writing-great-skills
+mattpocock/skills    skills/personal/obsidian-vault    # obsidian vault note management
+vercel-labs/skills   skills/find-skills                # discover & install more skills

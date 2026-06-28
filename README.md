@@ -21,6 +21,36 @@ npx skills add mehdiforoozandeh/skills -s dialectic # install one
 
 Add `-g` to install globally (available in every project) instead of into the current project.
 
+## Bootstrap a machine (`install.sh`)
+
+To set up a complete agentic workflow on a new machine, compute cluster, etc. in one
+command — my own skills **plus** a curated set of third-party skills:
+
+```bash
+git clone https://github.com/mehdiforoozandeh/skills.git ~/skills
+~/skills/install.sh
+```
+
+This symlinks everything into `~/.claude/skills/` so Claude Code picks it up:
+
+- **core** — my own skills (the `skills/*` folders in this repo)
+- **external** — third-party skills declared in [`external-skills.txt`](external-skills.txt),
+  cloned to `~/.claude/vendor-skills/` and tracking their default branch
+
+```bash
+./install.sh            # core + external   (default)
+./install.sh --core     # only my own skills
+./install.sh --external # only third-party skills
+```
+
+Re-run anytime to pull the latest of everything. The external list is plain text — one
+line per entry (`owner/repo  subpath`); a trailing `/` on the subpath installs every
+skill in that folder. Edit it to change my selection.
+
+> The script only ever creates or refreshes symlinks it manages — it **never deletes**,
+> and leaves any real (hand-placed) folder of the same name untouched. I don't vendor
+> third-party `SKILL.md` files into this repo; only the reference to them.
+
 ## Skills
 
 | Skill | What it does | Triggers |
@@ -52,9 +82,12 @@ the *structure* of a single answer.
 
 ```
 skills/<name>/SKILL.md   # one directory per skill (flat catalog)
+external-skills.txt       # curated third-party skills (references, not vendored)
+install.sh                # bootstrap: symlink core + external into ~/.claude/skills
 ```
 
-New skills are added as additional `skills/<name>/` folders.
+New skills are added as additional `skills/<name>/` folders; third-party skills are
+added as lines in `external-skills.txt`.
 
 ## License
 
