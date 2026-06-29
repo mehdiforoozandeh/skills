@@ -59,6 +59,7 @@ skill in that folder. Edit it to change my selection.
 | [`hier`](skills/hier/SKILL.md) | Answers as a nested toggle-list tree (or a mermaid diagram for design/architecture) instead of prose, when the shape of the answer is a hierarchy. | `/hier`, "break this down", "as a hierarchy" |
 | [`pingpong`](skills/pingpong/SKILL.md) | High-bandwidth collaboration mode: thinks deeply but replies in tight, one-idea-at-a-time turns that invite a reply. | `/pingpong`, "let's brainstorm", "design this with me" |
 | [`brevity`](skills/brevity/SKILL.md) | Concise-and-clear response mode: answer first, every word load-bearing, no preamble/hedging/recap — but keeps full grammar and precision (not caveman fragments). | `/brevity`, "be concise", "no fluff", "get to the point" |
+| [`catchup`](skills/catchup/SKILL.md) | Session refresher for resuming a long chat after time away: scans the current transcript and distills one scannable screen — the thread, where we are (incl. locked decisions), what's waiting on you, and the next moves. Reads only the conversation, not git/files. | `/catchup`, "where were we", "catch me up", "refresh me" |
 | [`era`](skills/era/SKILL.md) | Empirical-software search (a faithful port of Google's ERA / Flat UCB Tree Search): an LLM evolves whole candidate programs toward a scalar score, a flat PUCT bandit keeps a population and returns a diverse portfolio of winners. Ships a runnable scaffold + local example. | `era`, "evolutionary program search", `generate_fn/execute_fn` |
 
 > **`era` note:** the generator shells out to the `claude` / `cursor-agent` CLIs (subscription-authed), so a full search needs one of those installed; the bundled California-Housing example runs locally with no GPU/SLURM/tokens. The search engine `skills/era/scaffold/futs.py` is vendored from [google-research/era](https://github.com/google-research/era) under Apache-2.0 — see [NOTICE](NOTICE).
@@ -74,6 +75,8 @@ compose — e.g. run `pingpong`'s rhythm in `brevity`-tight beats.
 - **`hier`** — the answer's natural shape is a hierarchy you want to scan.
 - **`dialectic`** — a hard question worth stress-testing to convergence from independent
   angles.
+- **`catchup`** — you're returning to a long chat after a break and need a fast refresher
+  on where things stand before continuing.
 
 `brevity` governs the *density* of a turn, `pingpong` the *shape* of the exchange, `hier`
 the *structure* of a single answer.
