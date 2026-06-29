@@ -2,7 +2,7 @@
 
 Agent skills for [Claude Code](https://docs.claude.com/en/docs/claude-code) and other [skills.sh](https://www.skills.sh)-compatible agents, authored by [Mehdi Foroozandeh](https://mehdiforoozandeh.github.io).
 
-These are **response-mode / collaboration skills** — they change *how* the agent thinks and replies, not what tools it has. Each is self-contained in a single `SKILL.md`.
+Most are **response-mode / collaboration skills** — they change *how* the agent thinks and replies, not what tools it has; a few package **domain workflows** (concrete setups and playbooks). Each is self-contained in a single `SKILL.md`.
 
 ## Install
 
@@ -53,6 +53,8 @@ skill in that folder. Edit it to change my selection.
 
 ## Skills
 
+### Response-mode & collaboration
+
 | Skill | What it does | Triggers |
 |-------|--------------|----------|
 | [`dialectic`](skills/dialectic/SKILL.md) | Stress-tests a hard question to convergence via a three-agent loop — Thesis proposes, Antithesis attacks, Synthesis sublates into the next round's thesis. | `/dialectic`, "stress-test this to convergence" |
@@ -63,6 +65,12 @@ skill in that folder. Edit it to change my selection.
 | [`era`](skills/era/SKILL.md) | Empirical-software search (a faithful port of Google's ERA / Flat UCB Tree Search): an LLM evolves whole candidate programs toward a scalar score, a flat PUCT bandit keeps a population and returns a diverse portfolio of winners. Ships a runnable scaffold + local example. | `era`, "evolutionary program search", `generate_fn/execute_fn` |
 
 > **`era` note:** the generator shells out to the `claude` / `cursor-agent` CLIs (subscription-authed), so a full search needs one of those installed; the bundled California-Housing example runs locally with no GPU/SLURM/tokens. The search engine `skills/era/scaffold/futs.py` is vendored from [google-research/era](https://github.com/google-research/era) under Apache-2.0 — see [NOTICE](NOTICE).
+
+### Domain workflows
+
+| Skill | What it does | Triggers |
+|-------|--------------|----------|
+| [`latex-vscode`](skills/latex-vscode/SKILL.md) | Turns VS Code into an Overleaf-equivalent LaTeX setup with the LaTeX Workshop extension: build-on-save, PDF preview, SyncTeX, latexmk/bibtex, LTeX grammar, Live Share. A general local/remote playbook (compile from the CLI, diagnose `latexmk` errors, wire citations) with host-specific facts fenced off in their own section. | `latex`, `.tex`, "compile my paper", "build the pdf", SyncTeX, Overleaf |
 
 ## When to use which
 
