@@ -4,7 +4,7 @@ Agent skills for [Claude Code](https://docs.claude.com/en/docs/claude-code) and 
 
 Most are **response-mode / collaboration skills** — they change *how* the agent thinks and replies, not what tools it has; a few package **domain workflows** (concrete setups and playbooks). Each is self-contained in a single `SKILL.md`.
 
-> 🧭 **Looking for `crux`?** My agentic research companion — a scientific-method lab notebook — lives in its own repo: **[mehdiforoozandeh/crux](https://github.com/mehdiforoozandeh/crux)** (`npx skills add mehdiforoozandeh/crux`).
+> **[`crux`](https://github.com/mehdiforoozandeh/crux)** — an agentic research companion (a scientific-method lab notebook your LLM agent drives). Lives in its own repo: [mehdiforoozandeh/crux](https://github.com/mehdiforoozandeh/crux).
 
 ## Install
 
