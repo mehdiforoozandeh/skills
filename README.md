@@ -60,6 +60,7 @@ skill in that folder. Edit it to change my selection.
 | Skill | What it does | Triggers |
 |-------|--------------|----------|
 | [`dialectic`](skills/dialectic/SKILL.md) | Stress-tests a hard question to convergence via a three-agent loop — Thesis proposes, Antithesis attacks, Synthesis sublates into the next round's thesis. | `/dialectic`, "stress-test this to convergence" |
+| [`dialectic-brainstorming`](skills/dialectic-brainstorming/SKILL.md) | Brainstorms a no-ground-truth question with a panel of diverse, per-question-cast personas (one per orthogonal "quality" axis) that propose and cross-critique concrete candidates; a neutral Synthesizer prunes, recombines across axes (crossover), and returns an annotated short list — not one winner. Batched (cheap default) or isolated (fully independent) modes. | `/dialectic-brainstorming`, "brainstorm this with a diverse panel", "what should we name…" |
 | [`hier`](skills/hier/SKILL.md) | Answers as a nested toggle-list tree (or a mermaid diagram for design/architecture) instead of prose, when the shape of the answer is a hierarchy. | `/hier`, "break this down", "as a hierarchy" |
 | [`pingpong`](skills/pingpong/SKILL.md) | High-bandwidth collaboration mode: thinks deeply but replies in tight, one-idea-at-a-time turns that invite a reply. | `/pingpong`, "let's brainstorm", "design this with me" |
 | [`brevity`](skills/brevity/SKILL.md) | Concise-and-clear response mode: answer first, every word load-bearing, no preamble/hedging/recap — but keeps full grammar and precision (not caveman fragments). | `/brevity`, "be concise", "no fluff", "get to the point" |
@@ -85,6 +86,9 @@ compose — e.g. run `pingpong`'s rhythm in `brevity`-tight beats.
 - **`hier`** — the answer's natural shape is a hierarchy you want to scan.
 - **`dialectic`** — a hard question worth stress-testing to convergence from independent
   angles.
+- **`dialectic-brainstorming`** — a consequential, no-right-answer choice (naming, positioning,
+  "which direction") where you want many genuinely different minds to *generate and cross-critique*
+  options, then a curated shortlist rather than a single verdict. (`dialectic`'s divergent sibling.)
 - **`catchup`** — you're returning to a long chat after a break and need a fast refresher
   on where things stand before continuing.
 
