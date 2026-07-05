@@ -64,6 +64,7 @@ skill in that folder. Edit it to change my selection.
 | [`hier`](skills/hier/SKILL.md) | Answers as a nested toggle-list tree (or a mermaid diagram for design/architecture) instead of prose, when the shape of the answer is a hierarchy. | `/hier`, "break this down", "as a hierarchy" |
 | [`pingpong`](skills/pingpong/SKILL.md) | High-bandwidth collaboration mode: thinks deeply but replies in tight, one-idea-at-a-time turns that invite a reply. | `/pingpong`, "let's brainstorm", "design this with me" |
 | [`brevity`](skills/brevity/SKILL.md) | Concise-and-clear response mode: answer first, every word load-bearing, no preamble/hedging/recap — but keeps full grammar and precision (not caveman fragments). | `/brevity`, "be concise", "no fluff", "get to the point" |
+| [`mansplane`](skills/mansplane/SKILL.md) | Re-situates something the agent just said that drifted into ungrounded jargon or internal framing — not by dumbing it down (ELI5) but by filling in the missing context (brief backdrop → how it fits → where it lands in *this* conversation) with 1–2 concrete examples. Governed by one rule: say only what you're not sure the user already knows. | `/mansplane`, `/mansplane <term>`, "you lost me", "put that in perspective" |
 | [`catchup`](skills/catchup/SKILL.md) | Session refresher for resuming a long chat after time away: scans the current transcript and distills one scannable screen — the thread, where we are (incl. locked decisions), what's waiting on you, and the next moves. Reads only the conversation, not git/files. | `/catchup`, "where were we", "catch me up", "refresh me" |
 | [`era`](skills/era/SKILL.md) | Empirical-software search (a faithful port of Google's ERA / Flat UCB Tree Search): an LLM evolves whole candidate programs toward a scalar score, a flat PUCT bandit keeps a population and returns a diverse portfolio of winners. Ships a runnable scaffold + local example. | `era`, "evolutionary program search", `generate_fn/execute_fn` |
 
@@ -84,6 +85,9 @@ compose — e.g. run `pingpong`'s rhythm in `brevity`-tight beats.
 - **`pingpong`** — the work is collaborative (designing, deciding together); you want a
   tight back-and-forth, not a finished answer.
 - **`hier`** — the answer's natural shape is a hierarchy you want to scan.
+- **`mansplane`** — I drifted into terms or framing we never grounded and you want it pulled
+  back: re-situated in *our* words (backdrop → picture → where we are, + a simple example),
+  not explained like you're five. Says only what it's unsure you already know.
 - **`dialectic`** — a hard question worth stress-testing to convergence from independent
   angles.
 - **`dialectic-brainstorming`** — a consequential, no-right-answer choice (naming, positioning,
