@@ -67,6 +67,7 @@ skill in that folder. Edit it to change my selection.
 | [`mansplain`](skills/mansplain/SKILL.md) | Re-situates something the agent just said that drifted into ungrounded jargon or internal framing — not by dumbing it down (ELI5) but by filling in the missing context (brief backdrop → how it fits → where it lands in *this* conversation) with 1–2 concrete examples. Governed by one rule: say only what you're not sure the user already knows. | `/mansplain`, `/mansplain <term>`, "you lost me", "put that in perspective" |
 | [`catchup`](skills/catchup/SKILL.md) | Session refresher for resuming a long chat after time away: scans the current transcript and distills one scannable screen — the thread, where we are (incl. locked decisions), what's waiting on you, and the next moves. Reads only the conversation, not git/files. | `/catchup`, "where were we", "catch me up", "refresh me" |
 | [`era`](skills/era/SKILL.md) | Empirical-software search (a faithful port of Google's ERA / Flat UCB Tree Search): an LLM evolves whole candidate programs toward a scalar score, a flat PUCT bandit keeps a population and returns a diverse portfolio of winners. Ships a runnable scaffold + local example. | `era`, "evolutionary program search", `generate_fn/execute_fn` |
+| [`resolve`](skills/resolve/SKILL.md) | Dissolves a stuck trade-off instead of trading along it: names the element that must be two things at once, hunts the escape across the four separations (space/time/condition/whole-part), a reparameterization, and a trim — lists only the moves that genuinely apply, and says "genuine trade-off, here's how to pick" when none do. | `/resolve`, "can't improve X without hurting Y", "stuck on a trade-off", "break out of this frontier" |
 
 > **`era` note:** the generator shells out to the `claude` / `cursor-agent` CLIs (subscription-authed), so a full search needs one of those installed; the bundled California-Housing example runs locally with no GPU/SLURM/tokens. The search engine `skills/era/scaffold/futs.py` is vendored from [google-research/era](https://github.com/google-research/era) under Apache-2.0 — see [NOTICE](NOTICE).
 
@@ -95,9 +96,12 @@ compose — e.g. run `pingpong`'s rhythm in `brevity`-tight beats.
   options, then a curated shortlist rather than a single verdict. (`dialectic`'s divergent sibling.)
 - **`catchup`** — you're returning to a long chat after a break and need a fast refresher
   on where things stand before continuing.
+- **`resolve`** — you're stuck on a genuine two-sided trade-off ("improve A without hurting
+  B") and want the structural escapes, not a compromise point.
 
 `brevity` governs the *density* of a turn, `pingpong` the *shape* of the exchange, `hier`
-the *structure* of a single answer.
+the *structure* of a single answer. `dialectic` and `resolve` are *reasoning* modes —
+`dialectic` converges a contested claim, `resolve` dissolves a trade-off.
 
 ## Repository layout
 
