@@ -13,6 +13,7 @@
 mattpocock/skills    skills/productivity/              # grill-me, grilling, handoff, teach, writing-great-skills
 mattpocock/skills    skills/personal/obsidian-vault    # obsidian vault note management
 vercel-labs/skills   skills/find-skills                # discover & install more skills
+remotion-dev/skills  skills/remotion                   # official Remotion best-practices (video in React)
 
 # gstack (garrytan/gstack) — selected general-purpose skills (work standalone;
 # their gstack/bin preamble no-ops without the gstack runtime)
