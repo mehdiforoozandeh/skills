@@ -68,6 +68,8 @@ skill in that folder. Edit it to change my selection.
 | [`catchup`](skills/catchup/SKILL.md) | Session refresher for resuming a long chat after time away: scans the current transcript and distills one scannable screen — the thread, where we are (incl. locked decisions), what's waiting on you, and the next moves. Reads only the conversation, not git/files. | `/catchup`, "where were we", "catch me up", "refresh me" |
 | [`era`](skills/era/SKILL.md) | Empirical-software search (a faithful port of Google's ERA / Flat UCB Tree Search): an LLM evolves whole candidate programs toward a scalar score, a flat PUCT bandit keeps a population and returns a diverse portfolio of winners. Ships a runnable scaffold + local example. | `era`, "evolutionary program search", `generate_fn/execute_fn` |
 | [`resolve`](skills/resolve/SKILL.md) | Dissolves a stuck trade-off instead of trading along it: names the element that must be two things at once, hunts the escape across the four separations (space/time/condition/whole-part), a reparameterization, and a trim — lists only the moves that genuinely apply, and says "genuine trade-off, here's how to pick" when none do. | `/resolve`, "can't improve X without hurting Y", "stuck on a trade-off", "break out of this frontier" |
+| [`quiz-me`](skills/quiz-me/SKILL.md) | Tests whether your mental model still matches work that already exists (code, a PRD, a plan): derives a tree from the artifact, then asks one MCQ at a time — general framing first, then hard into the decision points, with distractors drawn from the alternatives that were genuinely considered and rejected. Triages every miss into *the agent drifted from your intent* (→ punch list) or *a gap on your side* (→ explained). | `/quiz-me`, "quiz me on this", "do I actually understand what we built", "am I still in sync with the code" |
+| [`tutor`](skills/tutor/SKILL.md) | `quiz-me`'s mirror, for a subject you don't know yet: demands a grounding source (you name it, it asks, or it searches one out), shows the syllabus for your approval, then climbs a general→specific knowledge tree one MCQ at a time — short corrections, no walls of text to read, one-shot with no memory between sessions. | `/tutor`, "teach me X", "tutor me on X", "walk me up from the basics" |
 
 > **`era` note:** the generator shells out to the `claude` / `cursor-agent` CLIs (subscription-authed), so a full search needs one of those installed; the bundled California-Housing example runs locally with no GPU/SLURM/tokens. The search engine `skills/era/scaffold/futs.py` is vendored from [google-research/era](https://github.com/google-research/era) under Apache-2.0 — see [NOTICE](NOTICE).
 
@@ -98,10 +100,18 @@ compose — e.g. run `pingpong`'s rhythm in `brevity`-tight beats.
   on where things stand before continuing.
 - **`resolve`** — you're stuck on a genuine two-sided trade-off ("improve A without hurting
   B") and want the structural escapes, not a compromise point.
+- **`quiz-me`** — a lot got built or planned while you steered at a distance, you don't want
+  to read all of it, and you want to find where your picture and the artifact disagree — plus
+  whether that's drift on the agent's side or a gap on yours.
+- **`tutor`** — you want to be *taught* something you don't know yet, by answering questions
+  rather than reading a lecture.
 
 `brevity` governs the *density* of a turn, `pingpong` the *shape* of the exchange, `hier`
 the *structure* of a single answer. `dialectic` and `resolve` are *reasoning* modes —
-`dialectic` converges a contested claim, `resolve` dissolves a trade-off.
+`dialectic` converges a contested claim, `resolve` dissolves a trade-off. `quiz-me` and
+`tutor` are the *interrogative* pair — one engine, opposite ground truth: `quiz-me` tests you
+against an artifact that can itself be wrong, `tutor` teaches you a subject where every miss
+is yours.
 
 ## Repository layout
 
