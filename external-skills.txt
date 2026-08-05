@@ -12,6 +12,7 @@
 
 mattpocock/skills    skills/productivity/              # grill-me, grilling, handoff, teach, writing-great-skills
 mattpocock/skills    skills/personal/obsidian-vault    # obsidian vault note management
+mattpocock/skills    skills/engineering/to-spec        # conversation -> spec doc, no interview (explicit-invoke only)
 vercel-labs/skills   skills/find-skills                # discover & install more skills
 remotion-dev/skills  skills/remotion                   # official Remotion best-practices (video in React)
 
