@@ -119,6 +119,36 @@ questions.
 of the artifact, so a miss says which part the user confused this one with. Never write a
 self-refuting option — it makes the question free.
 
+### Test reasoning, not retrieval
+
+**What separates the right option from the wrong one must be a *why*, never a stored value or a
+stored state.** The artifact remembers values and states perfectly and a grep retrieves them in
+seconds; the user's *model of the problem* is the only thing that can silently go stale, so it is
+the only thing worth testing.
+
+Two disqualifiers, both lookups wearing a question's clothes:
+
+- **Values.** Options differing by a threshold, version, count, rate, size, name, path, or date.
+  Ask the logic the value encodes: not *"is the bar 1.31 or 1.34"* but *"does the bar sit on the
+  raw score or the noise-corrected one."*
+- **Status and location.** Which module received a fix, how many of N items are done, what's
+  still open, where something lives, how far along a migration is. That is progress reporting —
+  it belongs in `catchup`, and a miss on it means only "hasn't read it lately."
+
+Values and locations may appear *inside* an option as incidental colour. They may never be the
+thing being chosen between.
+
+**The test — could a colleague who understands the problem but has never opened the artifact
+reason their way to the right option?** If yes, the question probes a model, and a miss localizes
+a wrong belief about the constraints, which is what drift actually is. If the only route to the
+answer is having read the file, it probes reading. Rewrite it or drop the node.
+
+So prefer questions whose answer is *derivable*: why an alternative was unsound rather than
+merely unpromising, what a design pays for what, which constraint forces a choice, what a
+pre-committed falsifier is guarding against, what breaks downstream if this flips. Where a value
+genuinely *is* the decision — a magic constant chosen over the obvious default — ask why that
+regime was chosen, not what digits it has.
+
 **"Why did we do X" questions** work the same way, except the options are the rejected
 *rationales* where recovered, and otherwise the reason most projects would give for the
 conventional choice.
