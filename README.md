@@ -64,6 +64,7 @@ skill in that folder. Edit it to change my selection.
 | [`hier`](skills/hier/SKILL.md) | Answers as a nested toggle-list tree (or a mermaid diagram for design/architecture) instead of prose, when the shape of the answer is a hierarchy. | `/hier`, "break this down", "as a hierarchy" |
 | [`pingpong`](skills/pingpong/SKILL.md) | High-bandwidth collaboration mode: thinks deeply but replies in tight, one-idea-at-a-time turns that invite a reply. | `/pingpong`, "let's brainstorm", "design this with me" |
 | [`brevity`](skills/brevity/SKILL.md) | Concise-and-clear response mode: answer first, every word load-bearing, no preamble/hedging/recap — but keeps full grammar and precision (not caveman fragments). | `/brevity`, "be concise", "no fluff", "get to the point" |
+| [`terse`](skills/terse/SKILL.md) | Rapid-fire conversation mode for a queue of questions: hard-caps the turn at 3 sentences / ~50 words and *lets content go*, the way a colleague answers across a desk. Keeps commands, numbers and flags exact or omits them entirely; never trades investigation for a shorter answer; overflows only for irreversible-action warnings, which it refuses to soften into reassurance. | `/terse`, "be super brief", "quick answers", "rapid fire", "keep it moving" |
 | [`mansplain`](skills/mansplain/SKILL.md) | Re-situates something the agent just said that drifted into ungrounded jargon or internal framing — not by dumbing it down (ELI5) but by filling in the missing context (brief backdrop → how it fits → where it lands in *this* conversation) with 1–2 concrete examples. Governed by one rule: say only what you're not sure the user already knows. | `/mansplain`, `/mansplain <term>`, "you lost me", "put that in perspective" |
 | [`catchup`](skills/catchup/SKILL.md) | Session refresher for resuming a long chat after time away: scans the current transcript and distills one scannable screen — the thread, where we are (incl. locked decisions), what's waiting on you, and the next moves. Reads only the conversation, not git/files. | `/catchup`, "where were we", "catch me up", "refresh me" |
 | [`era`](skills/era/SKILL.md) | Empirical-software search (a faithful port of Google's ERA / Flat UCB Tree Search): an LLM evolves whole candidate programs toward a scalar score, a flat PUCT bandit keeps a population and returns a diverse portfolio of winners. Ships a runnable scaffold + local example. | `era`, "evolutionary program search", `generate_fn/execute_fn` |
@@ -85,6 +86,9 @@ The response-mode skills shape *how* an answer arrives. Each owns one axis, so t
 compose — e.g. run `pingpong`'s rhythm in `brevity`-tight beats.
 
 - **`brevity`** — there's a question; you want the answer dense, clear, and complete.
+- **`terse`** — you have a *queue* of questions and want to keep firing. Same instinct as
+  `brevity`, opposite priority: `brevity` won't drop content to get shorter, `terse` will —
+  three sentences even when the full answer needs thirty, because you'll ask for the rest.
 - **`pingpong`** — the work is collaborative (designing, deciding together); you want a
   tight back-and-forth, not a finished answer.
 - **`hier`** — the answer's natural shape is a hierarchy you want to scan.
@@ -106,8 +110,8 @@ compose — e.g. run `pingpong`'s rhythm in `brevity`-tight beats.
 - **`tutor`** — you want to be *taught* something you don't know yet, by answering questions
   rather than reading a lecture.
 
-`brevity` governs the *density* of a turn, `pingpong` the *shape* of the exchange, `hier`
-the *structure* of a single answer. `dialectic` and `resolve` are *reasoning* modes —
+`brevity` governs the *density* of a turn, `terse` its *ceiling*, `pingpong` the *shape* of
+the exchange, `hier` the *structure* of a single answer. `dialectic` and `resolve` are *reasoning* modes —
 `dialectic` converges a contested claim, `resolve` dissolves a trade-off. `quiz-me` and
 `tutor` are the *interrogative* pair — one engine, opposite ground truth: `quiz-me` tests you
 against an artifact that can itself be wrong, `tutor` teaches you a subject where every miss
