@@ -74,6 +74,12 @@ skill in that folder. Edit it to change my selection.
 
 > **`era` note:** the generator shells out to the `claude` / `cursor-agent` CLIs (subscription-authed), so a full search needs one of those installed; the bundled California-Housing example runs locally with no GPU/SLURM/tokens. The search engine `skills/era/scaffold/futs.py` is vendored from [google-research/era](https://github.com/google-research/era) under Apache-2.0 — see [NOTICE](NOTICE).
 
+### Agent operations
+
+| Skill | What it does | Triggers |
+|-------|--------------|----------|
+| [`dispatch`](skills/dispatch/SKILL.md) | Picks the model tier for every subagent before spawning it, so cheap work stops running on the expensive model. One question decides the lane — does this agent write or run anything? Opus for writes/runs/design/judgment you'll act on, Sonnet for read-only research and summarizing, a Haiku swarm only inside a >5-agent read-only breadth sweep. Opus is the ceiling; four escalations override the lane, and the retry escalation stops there rather than climbing past it. Routes the model only — effort stays inherited. | `/dispatch`, "spawn subagents", "fan out", "run these in parallel", "which model should this agent use" |
+
 ### Domain workflows
 
 | Skill | What it does | Triggers |
