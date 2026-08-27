@@ -4,7 +4,10 @@ description: >-
   Pick the model tier for every subagent before spawning it, so cheap work runs on cheap
   models: Opus for anything that writes, runs, implements, designs, or carries consequence;
   Sonnet for read-only work like research, reading, and summarizing; a Haiku swarm when
-  fanning out more than five agents on a breadth sweep or brainstorm.
+  fanning out more than five agents on a breadth sweep or brainstorm; and grok, on the
+  separate Cursor meter, for token-heavy work whose answer you can check cheaply.
+  Also checks the remaining Claude 5-hour and 7-day allowance and shifts checkable work
+  to grok when either window runs low.
   TRIGGER — read BEFORE any subagent spawn, including agents you decided to spawn on your
   own initiative and `agent()` calls inside a Workflow. Do not skip it because the task
   "looks obvious" — the lane is a two-second check and the default is wrong half the time.
@@ -51,6 +54,61 @@ model", "this one's hard, go all out") is **not** naming it: that caps at `opus`
 **Haiku exists only in the swarm lane.** A lone Haiku agent is never the right call — if
 it's worth one agent, it's worth Sonnet.
 
+## The grok lane — a different meter
+
+`grok` is not a fourth tier. It is a Grok 4.6 subagent on the **Cursor** subscription,
+spawned through Bash, not through the Agent tool. Its work never touches the Claude
+allowance; only the answer it hands back enters context. Measured on a whole-repo read:
+291k tokens spent there, 4.7k returned here.
+
+So route this lane by **verifiability, not by strength**. Send grok anything token-heavy
+whose answer you can check cheaply — however hard it is:
+
+- whole-repo or whole-directory reads
+- log, output and test-failure sweeps
+- broad multi-file searches where only the conclusion comes back
+- first-draft implementations that ship with tests you will run
+
+Keep on the Claude lanes anything you **cannot** cheaply check: design judgment, research
+verdicts, anything writing to a crux vault, and any call where being subtly wrong costs
+more than the tokens saved. Grok output is untrusted input — verify before acting.
+
+```
+grok -r -e high "..."          read-only analysis   (the default posture)
+grok -e high "..."             write and run enabled
+grok -r -b brief.md "..."      splice a written brief in
+```
+
+Effort per task: `xhigh` for deep analysis where the answer is the deliverable, `high`
+by default, `medium` for mechanical sweeps, `low` for smoke tests only. Higher effort
+spends the other meter, so when in doubt go up.
+
+Grok runs in its own process and **cannot see this conversation**. A thin answer almost
+always means a thin brief. Mechanics, brief format and failure modes are in
+`references/grok.md` — read it before the first grok call of a session.
+
+## Quota gate
+
+Before a batch that will spend real tokens, check what is left:
+
+```
+~/.claude/bin/claude-quota
+```
+
+| Reading | Route |
+|---|---|
+| Fresh · 5-hour < 80% **and** 7-day < 75% | By the lanes above |
+| Fresh · 5-hour ≥ 80% **or** 7-day ≥ 75% | Send every checkable Claude-lane agent to grok instead, and say why |
+| **Stale · missing · `NO DATA`** | By the lanes above, and say "quota unknown" out loud |
+
+Gate at 80 rather than 95: the turn that checks the quota also spends it. The 7-day window
+gets the tighter gate because it refills over days, not hours.
+
+**Never read a missing cache as "near the limit."** `NO DATA` is the normal state on this
+machine — the cache is only written when Claude Code invokes the custom `statusLine`
+command, and the desktop app does not. Treating absence as a limit signal would route
+everything to grok forever, silently.
+
 ## Escalations
 
 Four conditions override the lane and send the work to `opus`:
@@ -78,6 +136,9 @@ correct. Shape depth through the prompt instead, which costs nothing:
 - Build agents on design or root-cause work: *"Verify by a second method before returning."*
 - Read agents: neither — let them work at their natural depth.
 
+This rule is about the Agent tool. `grok -e` is a different knob on a different
+meter — set it per task, as the grok lane says.
+
 ## Say what you routed
 
 Two things, both cheap:
@@ -86,7 +147,8 @@ Two things, both cheap:
   the implementation."* When an escalation fired, name it in the same line: *"opus — the
   sonnet pass came back hedged."*
 - **A model tag in every agent's `description`**, e.g. `review:auth [opus]`, so the routing
-  is visible in the agent list without opening anything.
+  is visible in the agent list without opening anything. Grok calls get the same tag in
+  the Bash description: `sweep crux engine [grok:xhigh]`.
 
 ## Mechanics
 
@@ -125,4 +187,9 @@ unclear · underspecified · read feeding critical
 sonnet/haiku came back thin                            → same task, one lane up
 opus came back thin                                    → sharpen the brief, same lane
 "use the best model" (fable not named)                 → opus
+
+token-heavy AND you can check the answer cheaply       → grok  (Cursor meter)
+token-heavy but you cannot check it                    → opus
+5h ≥ 80% or 7d ≥ 75%, reading fresh                    → shift checkable work to grok
+quota reading stale / missing / NO DATA                → route normally, say so
 ```
