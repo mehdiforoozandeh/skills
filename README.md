@@ -127,6 +127,13 @@ the exchange, `hier` the *structure* of a single answer. `dialectic` and `resolv
 against an artifact that can itself be wrong, `tutor` teaches you a subject where every miss
 is yours.
 
+## Global CLAUDE.md
+
+[`global-CLAUDE.md`](global-CLAUDE.md) is the `~/.claude/CLAUDE.md` these skills are
+written against: response format, the "What I need from you" closing block, scope
+bright lines, the check-the-authority rules, and delegating rules that point at
+`dispatch` and `orchestrate`. Copy it to `~/.claude/CLAUDE.md` to use it.
+
 ## Repository layout
 
 ```
