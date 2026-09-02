@@ -132,7 +132,7 @@ is yours.
 [`global-CLAUDE.md`](global-CLAUDE.md) is the `~/.claude/CLAUDE.md` these skills are
 written against: response format, the "What I need from you" closing block, scope
 bright lines, the check-the-authority rules, and delegating rules that point at
-`dispatch` and `orchestrate`. Copy it to `~/.claude/CLAUDE.md` to use it.
+`dispatch`. Copy it to `~/.claude/CLAUDE.md` to use it.
 
 ## Repository layout
 
