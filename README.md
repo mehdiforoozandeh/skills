@@ -79,6 +79,7 @@ skill in that folder. Edit it to change my selection.
 | Skill | What it does | Triggers |
 |-------|--------------|----------|
 | [`dispatch`](skills/dispatch/SKILL.md) | Picks the model tier for every subagent before spawning it, so cheap work stops running on the expensive model. One question decides the lane — does this agent write or run anything? Opus for writes/runs/design/judgment you'll act on, Sonnet for read-only research and summarizing, a Haiku swarm only inside a >5-agent read-only breadth sweep. Opus is the ceiling; four escalations override the lane, and the retry escalation stops there rather than climbing past it. Routes the model only — effort stays inherited. | `/dispatch`, "spawn subagents", "fan out", "run these in parallel", "which model should this agent use" |
+| [`orchestrate`](skills/orchestrate/SKILL.md) | Runs a multi-step task end to end as a foreman: a Fable planner writes a plan file of non-overlapping chunks, builder subagents build them in their own git worktrees, and the foreman only briefs, reads return slips and diffs, merges, logs, and re-briefs. Never does a chunk itself, so its context stays fresh for the whole run. Stops only for a decision that is the user's, a chunk that hit three retries, or a new dependency. Routes every spawn through `dispatch`. | `/orchestrate`, "orchestrate this", "run this end to end with subagents", "be the foreman" |
 
 ### Domain workflows
 
@@ -115,6 +116,9 @@ compose — e.g. run `pingpong`'s rhythm in `brevity`-tight beats.
   whether that's drift on the agent's side or a gap on yours.
 - **`tutor`** — you want to be *taught* something you don't know yet, by answering questions
   rather than reading a lecture.
+- **`orchestrate`** — a multi-step task you want done end to end by subagents while the main
+  agent only plans, briefs, reviews and merges, so its context stays fresh. Pairs with
+  `dispatch`, which picks the model for every agent it spawns.
 
 `brevity` governs the *density* of a turn, `terse` its *ceiling*, `pingpong` the *shape* of
 the exchange, `hier` the *structure* of a single answer. `dialectic` and `resolve` are *reasoning* modes —
