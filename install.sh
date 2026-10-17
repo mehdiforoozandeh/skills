@@ -37,10 +37,10 @@ mkdir -p "$SKILLS_DIR" "$VENDOR_DIR"
 
 linked=0; skipped=0
 
-# link_skill <source-dir> — symlink a skill folder into SKILLS_DIR by its basename.
+# link_skill <source-dir> [name] — symlink a skill folder into SKILLS_DIR (default name: its basename).
 link_skill() {
   local src="$1" name dest
-  name="$(basename "$src")"
+  name="${2:-$(basename "$src")}"
   dest="$SKILLS_DIR/$name"
   if [[ ! -f "$src/SKILL.md" ]]; then
     echo "  ! skip $name — no SKILL.md in $src" >&2; skipped=$((skipped+1)); return
@@ -85,7 +85,9 @@ if $do_external; then
       fi
 
       target="$clone_dir/$subpath"
-      if [[ "$subpath" == */ ]]; then          # whole folder: link each skill subdir
+      if [[ "$subpath" == "." ]]; then          # skill at repo root: link under the repo's name
+        link_skill "$clone_dir" "${repo##*/}"
+      elif [[ "$subpath" == */ ]]; then          # whole folder: link each skill subdir
         for d in "$target"*/; do
           [[ -d "$d" && -f "${d}SKILL.md" ]] && link_skill "${d%/}"
         done
