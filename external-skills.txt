@@ -11,11 +11,10 @@
 # pulls the latest. Remove a line to stop installing it on FUTURE machines —
 # install.sh never deletes existing links (run with care / unlink by hand).
 
-mattpocock/skills    skills/productivity/              # grill-me, grilling, handoff, teach, writing-great-skills
-mattpocock/skills    skills/personal/obsidian-vault    # obsidian vault note management
+mattpocock/skills    skills/productivity/              # grill-me, grilling, handoff, teach, to-questionnaire, wait-what, writing-for-agents
 mattpocock/skills    skills/engineering/to-spec        # conversation -> spec doc, no interview (explicit-invoke only)
 vercel-labs/skills   skills/find-skills                # discover & install more skills
-remotion-dev/skills  skills/remotion                   # official Remotion best-practices (video in React)
+remotion-dev/skills  skills/                           # official Remotion skills (video in React); remotion-best-practices routes to the rest
 blader/humanizer     .                                 # rewrite AI-sounding prose (Wikipedia "Signs of AI writing")
 
 # gstack (garrytan/gstack) — selected general-purpose skills (work standalone;
