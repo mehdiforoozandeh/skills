@@ -128,6 +128,4 @@ checks above if the cluster changes:
   (`module load` does not persist across separate Bash tool calls).
 
 ## Related skills
-- Manuscript prose → `scientific-writing`.
-- Generating/validating BibTeX entries → `citation-management`.
 - Publication figures → `scientific-visualization`.

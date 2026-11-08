@@ -101,10 +101,11 @@ persona's own prior turns** into its prompt, so each accumulates memory of *its 
 without ever seeing how the others think. Relay candidates and critiques, never internal
 reasoning. (In batched mode this is enforced by instruction inside the single call instead.)
 
-(Mechanism note: `SendMessage` live continuation is unavailable in this harness; re-spawn +
-own-history replay is equivalent here, since personas exchange only final candidates/critiques.)
+(Mechanism note: `SendMessage` can continue an agent with its context intact; this skill
+still re-spawns and replays own history, which is equivalent here, since personas exchange only final candidates/critiques.)
 
-Spawn with `subagent_type: general-purpose`. Calling the skill is the authorization to spawn.
+Load the `dispatch` skill before spawning agents. Spawn with `subagent_type:
+general-purpose`. Calling the skill is the authorization to spawn.
 
 ## 3. Round loop (default 2 rounds, hard cap 3; early-stop on a stable frontier)
 
