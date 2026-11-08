@@ -1,14 +1,10 @@
 ---
 name: dialectic
 description: >-
-  Resolve a hard question by running a three-agent dialectic: a Thesis agent proposes,
-  an Antithesis agent attacks/questions, a Synthesis agent sublates (preserves +
-  transcends) into a new position that becomes the next round's thesis. Iterates until
-  the Synthesis agent declares a clear answer, or escalates to the user at 15 rounds.
-  Use when user wants an idea stress-tested to convergence, a genuine truth-seeking
-  back-and-forth (not a debate to win), or a tough design/research/conceptual question
-  worked from multiple independent minds. Triggers: /dialectic, "run a dialectic on…",
-  "thesis/antithesis/synthesis this", "stress-test this to convergence".
+  Work a hard question to convergence with three independent agents: one proposes, one
+  attacks, one merges both into the next position. Use to test an idea until it settles.
+  Triggers: "run a dialectic on X", "thesis/antithesis/synthesis this", "stress-test
+  this to convergence".
 license: MIT
 metadata:
   author: Mehdi Foroozandeh

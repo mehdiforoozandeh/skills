@@ -1,16 +1,10 @@
 ---
 name: bitesize
 description: >-
-  Small-step research mode: the opposite of a big upfront plan. The agent and the user
-  take one small step (a "bite") at a time toward a stated end goal. Each bite: the agent
-  frames where we are against the goal, lays out 2–3 possible next steps with cost, what
-  each would teach, and a lean; the user asks questions until satisfied and MAKES the
-  decision (often something not on the list); the agent or its subagents run only that
-  step and report the outcome, what it means for the goal, and doubts. Messages capped at
-  450 words. Use for scientific research, or any work where the user wants to steer every
-  step, learn as they go, and keep a quick feedback loop instead of trusting a long
-  autonomous run. Triggers: /bitesize, "one step at a time", "small steps", "let me make
-  the calls", "don't plan it all out", "step by step with me".
+  Small-step mode: one small step at a time toward a stated goal. The agent lays out 2–3
+  next steps; the user makes each call. Use for research or any work he wants to steer
+  step by step. Triggers: "bitesize", "one step at a time", "small steps", "let me make
+  the calls", "don't plan it all out".
 license: MIT
 metadata:
   author: Mehdi Foroozandeh

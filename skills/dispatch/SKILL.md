@@ -1,18 +1,10 @@
 ---
 name: dispatch
 description: >-
-  Pick the model tier for every subagent before spawning it, so cheap work runs on cheap
-  models: Opus for anything that writes, runs, implements, designs, or carries consequence;
-  Sonnet for read-only work like research, reading, and summarizing; a Haiku swarm when
-  fanning out more than five agents on a breadth sweep or brainstorm; and grok, on the
-  separate Cursor meter, for token-heavy work whose answer you can check cheaply.
-  Also checks the remaining Claude 5-hour and 7-day allowance and shifts checkable work
-  to grok when either window runs low.
-  TRIGGER — read BEFORE any subagent spawn, including agents you decided to spawn on your
-  own initiative and `agent()` calls inside a Workflow. Do not skip it because the task
-  "looks obvious" — the lane is a two-second check and the default is wrong half the time.
-  Also fires on /dispatch, "spawn subagents", "fan out", "run these in parallel", "use a
-  swarm of agents", "which model should this agent use", "route this to a smaller model".
+  Pick the model for each subagent: Opus to write or run, Sonnet to read, a Haiku swarm
+  for wide read-only fan-outs, grok for heavy work that is cheap to check. Read BEFORE
+  every subagent spawn. Triggers: "spawn subagents", "fan out", "run these in parallel",
+  "which model should this agent use".
 license: MIT
 metadata:
   author: Mehdi Foroozandeh
@@ -28,6 +20,10 @@ both. Most delegated work does not need the best model in the lineup.
 The output-token spread is 10× end to end: Haiku $5/M, Sonnet $15/M, Opus $25/M, Fable
 $50/M. That spread pays off on volume, not on any single call — so route every spawn, and
 never agonize over one.
+
+Read this before every spawn, including agents you decide to spawn on your own and
+`agent()` calls inside a Workflow. Do not skip it because the task looks obvious: the
+lane is a two-second check, and the default is wrong half the time.
 
 ## The lanes
 

@@ -1,13 +1,9 @@
 ---
 name: hier
 description: >-
-  Hierarchical-outline response mode: answer as a nested-bullet toggle list (a tree),
-  not prose. Use when user wants a response structured as a hierarchy — designing a
-  project/system from scratch (goal → main components → subcomponents → …), breaking a
-  problem down, mapping structure, or any answer where the shape is a tree and they want
-  to scan it at a glance. Each node is a few words. Design/architecture hierarchies
-  auto-render as a mermaid diagram instead. Triggers: /hier, "give me the outline",
-  "as a hierarchy", "as a toggle list", "break this down", "structure this".
+  Answer as a nested-bullet tree, or a mermaid diagram for designs, instead of prose.
+  Slash-only: /hier.
+disable-model-invocation: true
 license: MIT
 metadata:
   author: Mehdi Foroozandeh

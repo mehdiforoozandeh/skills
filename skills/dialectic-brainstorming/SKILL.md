@@ -1,15 +1,10 @@
 ---
 name: dialectic-brainstorming
 description: >-
-  Brainstorm a consequential, no-ground-truth question with a panel of diverse minds, then
-  resolve it dialectically. A casting step derives orthogonal thinking-axes for the question
-  (each a quality to maximize) and casts one persona per axis; the personas propose and
-  cross-critique concrete candidates while a neutral Synthesizer prunes, recombines across
-  axes, and holds a frontier — returning a short list, not one winner. Use for naming
-  (products, tools, projects), positioning, or any choice of consequence with no objectively
-  correct answer where you want many genuinely different perspectives, not one. Triggers:
-  /dialectic-brainstorming, "brainstorm this with a diverse panel", "what should we name…",
-  "give me a shortlist from multiple perspectives".
+  Brainstorm a choice with no right answer, such as a name or a positioning, with a
+  panel of diverse personas that propose and critique candidates, and return a
+  shortlist, not one winner. Triggers: "brainstorm with a panel", "what should we name
+  X", "give me a shortlist".
 ---
 
 # dialectic-brainstorming — diverse minds diverge, dialectic converges

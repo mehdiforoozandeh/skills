@@ -1,15 +1,10 @@
 ---
 name: orchestrate
 description: >-
-  Run a multi-step task end to end as a foreman: a planner writes a plan file with
-  non-overlapping chunks, builder subagents build the chunks in their own git worktrees,
-  and the orchestrator only briefs, reads return slips and diffs, merges, and re-briefs.
-  The orchestrator never does big chunks of work itself, so its context stays fresh for
-  the whole run. Does not stop until every acceptance criterion passes, or a chunk hits
-  its retry cap. Routes every spawn through the dispatch skill. Use when the user wants a
-  task done end to end by a group of subagents, not by the main loop.
-  Triggers: /orchestrate, "orchestrate this", "run this end to end with subagents",
-  "be the foreman", "delegate the whole thing and just review", "keep your context fresh".
+  Run a multi-step task end to end with subagents: a planner writes the plan, builders
+  work in their own git worktrees, and the main agent only briefs, reviews, merges and
+  reports. Triggers: "orchestrate", "orchestreate", "delegate to subagents and verify",
+  "you orchestrate only".
 license: MIT
 metadata:
   author: Mehdi Foroozandeh

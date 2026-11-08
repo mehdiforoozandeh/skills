@@ -1,13 +1,10 @@
 ---
 name: terse
 description: >-
-  Rapid-fire conversation mode: reply in 2–3 sentences max — usually one, sometimes two
-  words — the way a colleague answers across a desk. A hard ceiling, not a target: the
-  reply is sized to the question, and when the whole answer doesn't fit, the part that
-  changes what the user does next lands now and the rest waits to be asked for. Use when
-  firing off a queue of questions and wanting to keep the momentum of a real conversation.
-  Triggers: /terse, "be super brief", "super short", "quick answers", "rapid fire",
-  "short answers only", "keep it moving".
+  Rapid-fire mode: answer in at most 2–3 sentences, often one word, like a colleague
+  across a desk; the rest waits to be asked for. Use for a queue of quick questions.
+  Triggers: "be super brief", "super short", "quick answers", "rapid fire", "keep it
+  moving".
 license: MIT
 metadata:
   author: Mehdi Foroozandeh
@@ -167,18 +164,3 @@ Right — same length, but the numbers and the flag survived:
 `/terse` or any trigger turns it on, and it **stays on** — every turn until the user says
 "stop terse", "normal mode", or asks for depth. The whole point is a run of questions, so
 don't quietly drift back to full length after a turn or two.
-
-## Not brevity
-
-`brevity` and `terse` both make answers shorter and they are not the same mode.
-
-`brevity` keeps the whole answer and strips the fat — it can still run long when the
-content is long, because its rule is *cut nothing that costs understanding*. Reach for it
-when the answer needs to be complete.
-
-`terse` caps the turn and lets content go — three sentences even when the full answer
-needs thirty, because the user is mid-conversation and will ask for the rest. Reach for it
-when the answer needs to be **fast**.
-
-If the user wants one careful complete answer, that's `brevity`. If they're firing
-questions and want to keep moving, that's this.

@@ -1,14 +1,9 @@
 ---
 name: mansplain
 description: >-
-  Re-situate something you (the agent) just said when it drifted into jargon or internal
-  framing the user never grounded — NOT by dumbing it down (ELI5), but by filling in the
-  missing context: a brief backdrop, how it fits together, and where it lands in *this*
-  conversation, always with 1–2 simple concrete examples. Governed by one rule — the
-  certainty test: say and explain only what you are not sure the user already knows. Use when
-  the user asks to have something put in perspective, re-anchored, or explained in the
-  conversation's own terms. Triggers: /mansplain, /mansplain <term>, "you lost me", "put that
-  in perspective", "situate that", "wait — what actually is X and why does it matter here".
+  Re-explain something the agent said that used jargon or framing the user never saw: a
+  short backdrop, how it fits, where it lands here, with 1–2 simple examples. Triggers:
+  "eli5", "in simpler terms", "wtf is X", "you lost me", "put that in perspective".
 ---
 
 # mansplain — situate it, don't simplify it

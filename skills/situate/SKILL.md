@@ -1,11 +1,10 @@
 ---
 name: situate
 description: >-
-  Re-orient the user in one screen: what we are doing, where we are, what is waiting on
-  him, next moves. Also resumes after a cluster outage or usage limit, and reports what we
-  wait for. Triggers: "where are we", "catch me up", "i just woke up", "what's left",
-  "what are we waiting for", "how much longer", "give me an update", "what's pending on
-  me", "tunnel's back up", "limits are reset, continue".
+  Re-orient the user in one screen: where we are, what waits on him, next moves. Also
+  resumes after a tunnel drop or usage limit. Triggers: "where are we", "catch me up",
+  "i just woke up", "what are we waiting for", "what's pending on me", "tunnel's back
+  up", "limits are reset, continue".
 license: MIT
 metadata:
   author: Mehdi Foroozandeh

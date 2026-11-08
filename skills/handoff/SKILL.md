@@ -1,10 +1,10 @@
 ---
 name: handoff
 description: >-
-  Write a handoff so a fresh agent session can continue this work: a full file on disk
-  and a paste message under 4,000 characters that points to it. Triggers: "give me a
-  handoff", "copy-pastable handoff", "copy paste into a new agent", "fresh agent",
-  "fresh context", "new session", "super short handoff".
+  Write a handoff so a fresh agent can continue this work: a file on disk and a paste
+  message under 4,000 characters that points to it. Triggers: "give me a handoff",
+  "copy-pastable handoff", "copy paste into a new agent", "fresh agent", "fresh
+  context", "new session", "super short handoff".
 license: MIT
 metadata:
   author: Mehdi Foroozandeh
