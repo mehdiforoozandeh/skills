@@ -1,18 +1,10 @@
 ---
 name: dispatch
 description: >-
-  Pick the model tier for every subagent before spawning it, so cheap work runs on cheap
-  models: Opus for anything that writes, runs, implements, designs, or carries consequence;
-  Sonnet for read-only work like research, reading, and summarizing; a Haiku swarm when
-  fanning out more than five agents on a breadth sweep or brainstorm; and grok, on the
-  separate Cursor meter, for token-heavy work whose answer you can check cheaply.
-  Also checks the remaining Claude 5-hour and 7-day allowance and shifts checkable work
-  to grok when either window runs low.
-  TRIGGER — read BEFORE any subagent spawn, including agents you decided to spawn on your
-  own initiative and `agent()` calls inside a Workflow. Do not skip it because the task
-  "looks obvious" — the lane is a two-second check and the default is wrong half the time.
-  Also fires on /dispatch, "spawn subagents", "fan out", "run these in parallel", "use a
-  swarm of agents", "which model should this agent use", "route this to a smaller model".
+  Pick the model for each subagent: Opus to write or run, Sonnet to read, a Haiku swarm
+  for wide read-only fan-outs, grok for heavy work that is cheap to check. Read BEFORE
+  every subagent spawn. Triggers: "spawn subagents", "fan out", "run these in parallel",
+  "which model should this agent use".
 license: MIT
 metadata:
   author: Mehdi Foroozandeh
@@ -28,6 +20,10 @@ both. Most delegated work does not need the best model in the lineup.
 The output-token spread is 10× end to end: Haiku $5/M, Sonnet $15/M, Opus $25/M, Fable
 $50/M. That spread pays off on volume, not on any single call — so route every spawn, and
 never agonize over one.
+
+Read this before every spawn, including agents you decide to spawn on your own and
+`agent()` calls inside a Workflow. Do not skip it because the task looks obvious: the
+lane is a two-second check, and the default is wrong half the time.
 
 ## The lanes
 
@@ -52,7 +48,8 @@ writes the word — *fable*, or a specific model ID. A capability request ("use 
 model", "this one's hard, go all out") is **not** naming it: that caps at `opus`.
 
 **Haiku exists only in the swarm lane.** A lone Haiku agent is never the right call — if
-it's worth one agent, it's worth Sonnet.
+it's worth one agent, it's worth Sonnet. The one exception: a hook-run headless capture, such as
+crux's background sweep, may use a lone Haiku agent.
 
 ## The grok lane — a different meter
 
@@ -86,28 +83,6 @@ spends the other meter, so when in doubt go up.
 Grok runs in its own process and **cannot see this conversation**. A thin answer almost
 always means a thin brief. Mechanics, brief format and failure modes are in
 `references/grok.md` — read it before the first grok call of a session.
-
-## Quota gate
-
-Before a batch that will spend real tokens, check what is left:
-
-```
-~/.claude/bin/claude-quota
-```
-
-| Reading | Route |
-|---|---|
-| Fresh · 5-hour < 80% **and** 7-day < 75% | By the lanes above |
-| Fresh · 5-hour ≥ 80% **or** 7-day ≥ 75% | Send every checkable Claude-lane agent to grok instead, and say why |
-| **Stale · missing · `NO DATA`** | By the lanes above, and say "quota unknown" out loud |
-
-Gate at 80 rather than 95: the turn that checks the quota also spends it. The 7-day window
-gets the tighter gate because it refills over days, not hours.
-
-**Never read a missing cache as "near the limit."** `NO DATA` is the normal state on this
-machine — the cache is only written when Claude Code invokes the custom `statusLine`
-command, and the desktop app does not. Treating absence as a limit signal would route
-everything to grok forever, silently.
 
 ## Escalations
 
@@ -190,6 +165,4 @@ opus came back thin                                    → sharpen the brief, sa
 
 token-heavy AND you can check the answer cheaply       → grok  (Cursor meter)
 token-heavy but you cannot check it                    → opus
-5h ≥ 80% or 7d ≥ 75%, reading fresh                    → shift checkable work to grok
-quota reading stale / missing / NO DATA                → route normally, say so
 ```

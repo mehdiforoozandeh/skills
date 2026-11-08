@@ -1,13 +1,10 @@
 ---
 name: era
 description: >-
-  Run ERA-style empirical-software search (Google ERA / Flat UCB Tree Search) to
-  evolve whole programs toward a scalar objective. Use for software/algorithm
-  DESIGN: an LLM writes and rewrites complete candidate programs, a sandbox scores
-  each, and a flat PUCT bandit (FUTS) keeps a population and decides which to
-  improve next — escaping local optima and returning a diverse portfolio of
-  winners. Domain-agnostic. Triggers: ERA, FUTS, Flat UCB Tree Search, empirical
-  software search, evolutionary program search, generate_fn/execute_fn.
+  Evolve whole programs toward a scalar score with ERA-style search (Flat UCB Tree
+  Search): an LLM writes candidate programs, a sandbox scores them, a bandit picks which
+  to improve next. Use for algorithm design by search. Triggers: ERA, FUTS, empirical
+  software search, evolutionary program search.
 license: MIT
 metadata:
   author: Mehdi Foroozandeh

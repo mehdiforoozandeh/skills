@@ -1,15 +1,10 @@
 ---
 name: orchestrate
 description: >-
-  Run a multi-step task end to end as a foreman: a planner writes a plan file with
-  non-overlapping chunks, builder subagents build the chunks in their own git worktrees,
-  and the orchestrator only briefs, reads return slips and diffs, merges, and re-briefs.
-  The orchestrator never does big chunks of work itself, so its context stays fresh for
-  the whole run. Does not stop until every acceptance criterion passes, or a chunk hits
-  its retry cap. Routes every spawn through the dispatch skill. Use when the user wants a
-  task done end to end by a group of subagents, not by the main loop.
-  Triggers: /orchestrate, "orchestrate this", "run this end to end with subagents",
-  "be the foreman", "delegate the whole thing and just review", "keep your context fresh".
+  Run a multi-step task end to end with subagents: a planner writes the plan, builders
+  work in their own git worktrees, and the main agent only briefs, reviews, merges and
+  reports. Triggers: "orchestrate", "orchestreate", "delegate to subagents and verify",
+  "you orchestrate only".
 license: MIT
 metadata:
   author: Mehdi Foroozandeh
@@ -24,7 +19,7 @@ resource: every repo file you open, every transcript you skim, every test suite 
 inline pushes you toward the dumb zone, the point where a long context makes you slower
 and worse. Everything below exists to keep you out of it.
 
-Load the `dispatch` skill before the first spawn, and run its quota gate. Dispatch picks
+Load the `dispatch` skill before the first spawn. Dispatch picks
 the model tier for every agent below. This skill picks what each agent does.
 
 Two facts about the harness, verified on this machine, shape the mechanics:
@@ -99,19 +94,36 @@ with the broken rule named, and stop if the second plan breaks one too.
 - Every acceptance criterion is a command with an expected result, not a sentence.
 - Owned test files are named by path, never as a directory.
 
+**Plan review.** Before any builder launches, spawn one fresh read-only reviewer with the
+plan file path. It has not seen the planning, so it reads the plan cold. Dispatch puts it
+in the Build lane: you act on its verdict. It returns findings under these headings:
+
+- Budget and feasibility
+- Factual errors, each with a `Fix:` line
+- Coverage gaps
+- Undefined terms
+- Cuts
+- Decision gates and stop rules
+- Number spot-check: every number in the plan against its source
+
+Send the findings to the planner once to amend the plan, and log the review. A finding
+that needs the user goes under Decisions needed.
+
 **Commit policy.** Builders commit on their chunk branches, and merging a chunk creates
 a commit on the working branch. CLAUDE.md forbids commits unless the user asked. So the
 plan summary you post ends with one ask: permission for builders to commit on `chunk/*`
 branches and for you to merge them into the working branch, local only, no push. If the
 user's request already granted it ("commits ok", "merge as you go"), skip the ask.
-Nothing else in this skill waits for the user.
+The summary also asks how many minutes the user will spend reading the final report,
+unless he already said. Record the answer in the plan's Goal section. Nothing else in
+this skill waits for the user.
 
 If the repo is on its default branch, create a working branch first, named
 `orchestrate/<short task slug>`, and merge into that. CLAUDE.md asks for it.
 
-**Done when:** the plan file exists, passes every rule, the Decisions needed section is
-empty or answered, you have posted a five-line summary to the user, and the commit policy
-is granted.
+**Done when:** the plan file exists, passes every rule, the plan review is logged and
+acted on, the Decisions needed section is empty or answered, you have posted a five-line
+summary to the user, the commit policy is granted, and the reading time is recorded.
 
 ### 2. Spawn a wave
 
@@ -143,7 +155,10 @@ brief contains, in this order:
    you return". Name any environment trap the planner found.
 6. The commit step: `git -C <worktree> add <owned files> && git -C <worktree> commit -m
    "<id> <name>"`. Without it the branch is empty and there is nothing to merge.
-7. The return slip format below, and: "Return the slip and nothing else. No ELI5, no
+7. The working rules, pasted: "Report what failed and why, and what you did not check.
+   Compare every effect with seed noise before you report it. Give every long job a
+   cheap progress check in its first 30 minutes. Keep tool output small."
+8. The return slip format below, and: "Return the slip and nothing else. No ELI5, no
    TL;DR, no 'What I need from you' block. The Open line is the only place for an ask."
    Builders inherit the global CLAUDE.md, and without this line they append all three.
 
@@ -170,6 +185,8 @@ Commit: <sha>
 Files changed: <paths>
 Tests: <command> → <pass/fail, counts, failing lines if any>
 Deviations from the brief: <none, or what and why>
+Failed: <none, or what failed and why>
+Not checked: <none, or what you did not check>
 Open: <none, or what a human must decide>
 ```
 
@@ -223,9 +240,18 @@ A failed criterion is a new chunk: brief it, run it, review it, verify again. Tw
 rounds is the cap. A criterion still failing after the second round is a stop: report it
 as open with the verifier's observed output.
 
-**Done when:** every criterion passes. Then report to the user:
+**Done when:** every criterion passes. Then write the report, sized to the reading time
+in the plan's Goal. Overflow goes to a supplement file next to the plan, not meant to be
+read. Give every number in the report its source file.
+
+**Number check.** Before the report reaches the user, spawn fresh `sonnet` agents, one per
+report section. Each checks every number in its section against the source file and lists
+each mismatch with its location in the report and its source. They edit nothing. You fix
+the mismatches, then send the report:
 
 - What shipped, in one paragraph.
+- **Overturned:** earlier claims this work contradicted, each with what overturned it,
+  or "none".
 - One line per chunk: id, retries, outcome.
 - What is uncommitted, and what is left behind: the plan file, the worktrees under
   `<repo parent>/.orchestrate-wt/`, and the `chunk/*` branches. You do not remove them. Give the
@@ -254,6 +280,8 @@ planner    → fable, writes .orchestrate/plan.md, returns the chunk table only
 builder    → per dispatch (Build lane), own worktree, background, commits on chunk/<id>
 reviewer   → per dispatch (Build lane), read-only, only when a diff is over 300 lines
 verifier   → per dispatch (Build lane), runs the acceptance criteria, one line each
+plan check → per dispatch (Build lane), read-only, once before wave 1
+num check  → sonnet, one per report section, lists mismatches, edits nothing
 you        → brief, read slips and diffs, merge, log, re-brief, report
 
 plan breaks a rule            → back to planner once, rule named; twice is a stop

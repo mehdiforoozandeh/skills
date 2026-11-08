@@ -2,7 +2,7 @@
 #
 # install.sh — bootstrap my agentic skills onto a machine.
 #
-# Symlinks skills into ~/.claude/skills/ so Claude Code picks them up:
+# Symlinks skills into ~/.claude/skills/ (and ./agents/*.md into ~/.claude/agents/):
 #   - "core"     = my own skills, the ./skills/* folders in this repo
 #   - "external" = third-party skills declared in ./external-skills.txt,
 #                  cloned to ~/.claude/vendor-skills/ and tracking their main branch
@@ -61,6 +61,19 @@ if $do_core; then
   else
     echo "  (no ./skills directory found)"
   fi
+fi
+
+if $do_core && [[ -d "$REPO_DIR/agents" ]]; then
+  echo "== core agents (from $REPO_DIR/agents) =="
+  AGENTS_DIR="$HOME/.claude/agents"; mkdir -p "$AGENTS_DIR"
+  for f in "$REPO_DIR"/agents/*.md; do
+    [[ -f "$f" ]] || continue
+    dest="$AGENTS_DIR/$(basename "$f")"
+    if [[ -e "$dest" && ! -L "$dest" ]]; then
+      echo "  ! skip $(basename "$f") — a real file exists at $dest (left untouched)" >&2; skipped=$((skipped+1)); continue
+    fi
+    ln -sfn "$f" "$dest"; echo "  ✓ $(basename "$f")"; linked=$((linked+1))
+  done
 fi
 
 if $do_external; then

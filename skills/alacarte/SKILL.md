@@ -1,20 +1,10 @@
 ---
 name: alacarte
 description: >-
-  Walk the design forks of one part of an experiment or method as clickable
-  multiple-choice questions, one fork at a time. Use AFTER the goal, requirements and
-  limits are settled (e.g. in a `bitesize` conversation), when what is left is choosing
-  among known options: loss function, architecture, preprocessing, split, metric,
-  baseline. The agent maps the forks under the scope the user names, orders them
-  upstream-first, and asks each with `AskUserQuestion`: every question carries the agent's
-  recommendation and why, and allows several picks when testing several options makes
-  sense (several = ablation arms). It prunes forks that later answers make moot and ends
-  with a decision record. Inside a `bitesize` session, offer it as a candidate bite when
-  the next decision is a set of known-option choices. NOT for open-ended goal-setting (use
-  `bitesize` or `pingpong`), and NOT for stress-testing a plan (use `grilling`). Triggers:
-  /alacarte, "walk me through the choices for X", "what are my options for X", "go through
-  the design decisions", "multiple-choice the design", "which loss / architecture /
-  preprocessing should I use".
+  Walk the design choices of an experiment as clickable multiple-choice questions, one
+  at a time, each with a recommendation. Use after the goal is set, when what is left is
+  picking among known options. Triggers: "walk me through the choices for X", "what are
+  my options for X", "which loss should I use".
 license: MIT
 metadata:
   author: Mehdi Foroozandeh

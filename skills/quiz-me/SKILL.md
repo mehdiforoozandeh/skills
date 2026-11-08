@@ -1,18 +1,10 @@
 ---
 name: quiz-me
 description: >-
-  Test whether the user's mental model still matches work that already exists — code the
-  agent wrote, a PRD, a plan, a document tree — usually because they delegated it, skimmed
-  it, or were away while it was built. Derives a tree from the artifact, then asks one
-  multiple-choice question at a time: general framing first, then hard into the decision
-  points, with distractors drawn from the alternatives actually rejected, or from the
-  conventional choice this artifact departed from.
-  Every wrong answer is triaged — did the agent drift from the user's intent (→ punch list),
-  or is it a gap in the user's knowledge (→ explained)? Needs an artifact that already
-  exists: for a subject nothing was built for use `tutor`, and for a plain re-orientation
-  with no questions asked use `catchup`. Triggers: /quiz-me, "quiz me on what we built",
-  "test me on this plan", "grill me on the code you wrote", "do I actually understand what
-  we built", "am I still in sync with what you wrote", "I approved that without reading it".
+  Test, one multiple-choice question at a time, whether the user's picture matches work
+  already built (code, a plan, a PRD), and sort each miss into agent drift or a gap in
+  his knowledge. Triggers: "quiz me on what we built", "test me on this plan", "am I
+  still in sync", "I approved that without reading it".
 license: MIT
 metadata:
   author: Mehdi Foroozandeh
@@ -133,7 +125,7 @@ Two disqualifiers, both lookups wearing a question's clothes:
   raw score or the noise-corrected one."*
 - **Status and location.** Which module received a fix, how many of N items are done, what's
   still open, where something lives, how far along a migration is. That is progress reporting —
-  it belongs in `catchup`, and a miss on it means only "hasn't read it lately."
+  it belongs in `situate`, and a miss on it means only "hasn't read it lately."
 
 Values and locations may appear *inside* an option as incidental colour. They may never be the
 thing being chosen between.

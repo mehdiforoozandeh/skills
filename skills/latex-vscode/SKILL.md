@@ -1,15 +1,10 @@
 ---
 name: latex-vscode
 description: >-
-  Set up, compile, preview, and troubleshoot LaTeX in VS Code with the LaTeX
-  Workshop extension — an Overleaf-equivalent local/remote workflow (build-on-save,
-  PDF preview, SyncTeX, latexmk, bibtex citations, LTeX grammar, Live Share).
-  Use whenever working with .tex/.bib files, building a PDF, fixing a
-  LaTeX/latexmk compile error, wiring citations/bibliography, or configuring the
-  LaTeX Workshop / LTeX / Live Share setup. Triggers: latex, .tex, latexmk,
-  pdflatex, lualatex, bibtex, \cite, build the pdf, compile my paper, SyncTeX,
-  Overleaf, LaTeX Workshop. NOT for writing prose (use scientific-writing) or
-  generating BibTeX entries (use citation-management).
+  Set up, compile, preview and fix LaTeX in VS Code with LaTeX Workshop: build-on-save,
+  PDF preview, SyncTeX, latexmk, bibtex. Use with .tex/.bib files or a LaTeX compile
+  error. Triggers: latex, .tex, latexmk, bibtex, "compile my paper", "build the pdf",
+  Overleaf.
 ---
 
 # LaTeX in VS Code (Overleaf-equivalent)
@@ -128,6 +123,4 @@ checks above if the cluster changes:
   (`module load` does not persist across separate Bash tool calls).
 
 ## Related skills
-- Manuscript prose → `scientific-writing`.
-- Generating/validating BibTeX entries → `citation-management`.
 - Publication figures → `scientific-visualization`.

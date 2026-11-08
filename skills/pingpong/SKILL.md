@@ -1,12 +1,10 @@
 ---
 name: pingpong
 description: >-
-  Interactive, high-bandwidth collaboration mode: think deeply but answer in tight,
-  one-idea-at-a-time turns that invite a reply. Use when user wants to brainstorm,
-  design something from scratch, be grilled/Socratically questioned, pressure-test an
-  idea, or do any open-ended collaborative work they want to keep engaging and iterative
-  rather than receiving one large dump of text. Triggers: /pingpong, "let's brainstorm",
-  "design this with me", "think out loud with me", "let's go back and forth".
+  Back-and-forth design mode: think deeply, answer one idea per turn, and end each turn
+  with a question. Use to brainstorm or design together. Triggers: "ping pong on it",
+  "pingpong", "ask me with MCQs", "traverse the tree and ask me", "let's brainstorm",
+  "design this with me".
 license: MIT
 metadata:
   author: Mehdi Foroozandeh
@@ -39,6 +37,9 @@ sized so the user can react in one breath. He drives; you advance the thread one
 - **Design from scratch** — propose the first real decision (the load-bearing one), get
   his call, then the next. Build the design as a sequence of small agreed choices.
 - **Pressure-test** — state the single strongest objection to his idea, then stop.
+- **Tree walk** — when he asks for MCQs or to traverse the tree: map the decision tree
+  privately, then ask one multiple-choice question per turn, top-down, each with your
+  recommendation marked.
 
 ## What breaks the mode
 

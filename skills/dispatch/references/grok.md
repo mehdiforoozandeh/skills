@@ -102,21 +102,6 @@ escalate effort on the same brief and expect a different answer.
 Parallel calls are fine: three concurrent agents finished in 8s in testing. Fan
 out freely.
 
-## Quota gate
-
-`~/.claude/bin/claude-quota` reports the Claude 5-hour and 7-day windows from a
-cache that the statusline writes.
-
-**Known limitation:** the cache is only written when Claude Code invokes the
-custom `statusLine` command. In the desktop app it is never invoked — probed
-directly on 2026-08-27 across ten renders, zero invocations, no cache file
-written since the script was created on 2026-08-22. It may work in a terminal
-`claude` session; that is untested.
-
-So `claude-quota` will usually print `NO DATA`. That is the expected state, and
-it means **route normally and say the quota is unknown** — never treat it as a
-limit signal. See the gate table in `SKILL.md`.
-
 ## Privacy
 
 Grok runs on Cursor's servers. Repo contents in the working directory are

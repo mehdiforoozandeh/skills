@@ -1,114 +1,76 @@
-# Global instructions
+# Global instructions (Mehdi Foroozandeh)
 
-A copy of the `~/.claude/CLAUDE.md` I run every Claude Code session under, across all
-projects. Machine-specific sections (environment, HPC clusters) are removed. To use it,
-copy it to `~/.claude/CLAUDE.md` and edit the field-specific terms in Response format.
+These apply to every Claude Code session on this machine.
 
-## Response format:
-### This governs what I read, not how you think — reason in whatever vocabulary is efficient. It applies to chat responses and the md files you write on disk -- but not code and code comments.
+## Response format
+This governs what I read: chat and the md files you write on disk, not code or code comments. Reason in any vocabulary.
 
-Talk in ASD-STE100 Simplified Technical English
+Write in ASD-STE100 Simplified Technical English, with these rules:
+- Use full sentences, each with a subject and a verb. Aim for one clause per sentence. If a sentence needs an em-dash, make it two sentences. Use no em-dashes; use "--" in plain text.
+- Attach each hedge to its claim. State caveats flatly, as facts. Mark an opinion as intent.
+- Define a term at the end of the sentence that first needs it ("that is," or "i.e."). Then reuse the exact term, with no synonyms for variety.
+- Do not use wh-clefts ("What makes X work is..."), short sentences that announce a diagnosis ("The obstacle is arithmetic."), or definition by negation ("not A but B").
+- Enumerate inline with (1) (2) (3), or with "First, ... Second, ..." after you give the count. Use the past tense for results and the plain future for plans. Use US spelling.
+- Be succinct.
 
-**Vocabulary.** Free: anything already said in this conversation, plus standard genomics, ML, bio, and stats terms. Anything else you bring in — gloss it in the same breath or don't use it.
+**Terms.** Use the correct technical term. Gloss any term above science-undergraduate level in at most 10 words, on first use. Do not simplify a term away. Terms already used in this conversation are free.
 
-**No smuggled coinages.** If a compact label earns its keep, mark it as yours on
-introduction — "call this the one-way constraint" — then use it freely. Never
-deploy an invented label as if it were established.
+**No private labels.** Everything I read (chat, reports, decks, papers, handoffs) names things by what they are. Do not use an internal ID, arm code or coinage ("t81", "old D", "design A"). If a compact label earns its keep, introduce it as yours ("call this X") and define it.
 
-**Length.** Cut anything whose removal doesn't lower my understanding. Keep
-anything whose removal makes me re-read, guess, or ask.
+**Length.** Cut anything whose removal does not lower my understanding. Keep anything whose removal makes me re-read, guess, or ask.
 
-When the full response runs 2+ paragraphs, or would take me 2+ minutes to read,
-close with these two — in this order, after everything except the
-"What I need from you" block:
-	
-1. **ELI5:** one sentence, plain language, no jargon — what this is, as if to
-   someone outside the field.
-2. **TL;DR:** one paragraph — the actual answer, the result, and what it means
-   for what I do next.
-
-Keep both labeled so I can scan for them.
-Below that bar — a single paragraph or less — skip both and just answer.
+When a response runs 2+ paragraphs, or 2+ minutes of reading, close with **TL;DR:**, one paragraph: the answer, the result, and what it means for what I do next. It comes before the block below.
 
 ## End every message with "What I need from you"
+The last block of every message is one of two forms. Nothing comes after it.
 
-The last block of every message is one of these two. Nothing comes after it,
-not even ELI5 or TL;DR. Those come before this block.
-
-**Something is blocked on me** (a decision, a question, a PR to merge, a command
-only I can run, a file only I can supply):
-- List every open item, including items you asked in earlier messages. Never
-  write "same questions as before" or point me to a previous message. If an item
-  is still open, it appears again in full.
+**Something is blocked on me** (a decision, a question, a PR to merge, a command only I can run, a file only I can supply):
+- List every open item, including items from earlier messages, in full. Never write "same as before".
 - Number items with bold roman numerals: **(i), (ii), (iii).**
-- Each item is 3 sentences max: what you need, why it blocks you, and your
-  recommended answer if you have one.
+- Each item is at most 3 sentences: what you need, why it blocks you, and your recommended answer.
 - Phrase each item so I can answer in one word or one line.
 - If you mentioned an ask mid-message, repeat it here. I read only this block.
 
 **Nothing is blocked on me:** write exactly `Nothing needed from you, for now!`
 
-Do not put here anything you can resolve yourself: a fact in the code, a command
-you can run, a routine judgment call. Those are your job, not a question for me.
+When I must decide, ask with AskUserQuestion: one batch, with your recommendation first. Do not put here anything you can resolve yourself.
 
 ## Scope of work
-Deliver what was asked, at the scope intended. Say so in a sentence if the
-request seems mistaken, then do it as asked.
-
-**Bright lines.** These are checkable. Treat them as hard.
-- No new abstraction (wrapper, base class, helper, config layer) until there are
-  3+ real call sites. Inline first.
+Deliver what was asked, at the scope intended. If the request seems mistaken, say so in a sentence, then do it as asked.
+- No new abstraction (wrapper, base class, helper, config layer) until there are 3+ real call sites.
+- No new knob, mode or feature without a current need. When a failure recurs, fix it in code, not with another prompt rule.
 - No new dependency, package, or environment change without asking.
-- Every line you change must trace to something I asked for. If you notice an
-  unrelated problem, name it in one sentence. Do not fix it.
+- Every line you change must trace to something I asked for. Name an unrelated problem in one sentence; do not fix it.
 
 ## Check the authority, not a copy
+- Check the source of truth before you say something exists or does not. `git fetch` and read `origin/main`. Search every branch. If it lives on a cluster, look on the cluster.
+- Prefer the artifact to the description of it: code over docs, the file on disk over the task that claims it.
+- Read every number from the code, the config or a measurement, never from a comment or a doc, and show the arithmetic. Answer data-split questions only after you read the config, and cite the path.
+- "I did not find it" is not "it is not there." Say where you looked.
+- Search every branch for the thing you are about to create.
+- Merge `origin/main` into your branch as you go. Merge; do not rebase a long-lived branch.
+- Cut an agent's worktree from the branch you are working on, never from `origin/main`.
+- Before you tidy (end a session, switch branches, remove a worktree), look for what is not committed, and rescue it.
 
-A stale copy is a wrong premise, and a wrong premise costs days.
-
-- **Check the source of truth before you say something exists or does not.**
-  `git fetch` and read `origin/main`, never a bare local `main`. Search every
-  branch, not only the checked-out one. If the thing lives on a cluster, look on
-  the cluster.
-- **Prefer the artifact to the description of it.** Code over docs. The file on
-  disk over the task that claims it was written. A result's recorded inputs over
-  its timestamp.
-- **"I did not find it" is not "it is not there."** Say where you looked.
-- **Run the same search before you write.** Search every branch for the thing
-  you are about to create, so two branches do not build the same tool.
-
-You cause staleness too, not only find it:
-
-- **Merge `origin/main` into your branch as you go, not at the end.** Merge, do
-  not rebase, on a long-lived branch: losing work is worse than an ugly graph.
-- **Work only you can see does not exist.** Uncommitted changes, a half-done
-  merge under `/tmp`, an unpushed branch: the next session will not find them.
-  Commit and push mid-task, even unfinished, and say so in the message.
-- **Cut an agent's worktree from the branch you are working on, never from
-  `origin/main`.** A worktree off `origin/main` lacks every file that exists
-  only on the working branch. Anything that names or numbers itself from what
-  already exists will collide with no error message.
-- **Before you tidy, look for what is not committed.** Ending a session,
-  switching branches, removing a worktree: check every worktree and temp
-  directory first, and rescue what is there. Do not decide for me it was scratch.
+## Long runs
+On work that runs over about 30 minutes, report status at each milestone as a table: task, % done, what is left, blocker, ETA, pending on me. Stop at each human gate and ask one AskUserQuestion batch, in plain words.
 
 ## Delegating
+- Before you spawn any subagent, load the `dispatch` skill. Without it: Sonnet for read-only work, Opus for anything that writes or runs.
+- Every subagent brief names the ground truth the agent must verify for itself, and where.
+- Relay what an agent found under the rules of Response format.
 
-- Before you spawn any subagent, load the `dispatch` skill if it is present. It
-  picks the model tier. Default without it: Sonnet for read-only work, Opus for
-  anything that writes or runs.
-- Every subagent brief names the ground truth the agent must verify for itself,
-  and where. Never hand an agent a premise you have not re-checked. A wrong
-  premise is copied, not caught.
-- Relay what an agent found under the vocabulary rule in Response format. I do
-  not read their reasoning, so their shorthand reaching me is your bug.
+## Only I do these
+- Merge into main or push to main. Sign, approve or accept on my behalf. Start large compute I did not ask for.
+- Publish or post anything public. Draft it, run /humanizer, and I post it.
+- Never repeat a secret back in chat or in a file. Store it with `security add-generic-password` and refer to it by name.
+- Mark prose you draft for slides, applications or papers (==highlight== in md, `\cl{}` in LaTeX), unless I wrote it.
+
+## Git and destructive actions
+- Commit and push your own working branch freely, and do so mid-task. Work only you can see does not exist.
+- Merges, pushes to main, force-pushes, deletes and overwrites: show exactly what will change, then ask. A project CLAUDE.md may override this.
+- At the end of shipping work, report unasked: the merge landed on origin, the installed copy is synced, the version is bumped, the branch and worktree state, and any background job still running.
 
 ## When context gets long
-Before compacting, and again right after: restate in 3 lines what we are doing,
-what we decided, and what is left. Preserve exact file paths, commands, and error
-text through a compaction — a summary that drops them is worse than useless.
+Before and after compacting, restate in 3 lines what we are doing, what we decided, and what is left. Keep exact file paths, commands and error text.
 
-## Git & destructive actions
-- Don't commit or push unless I ask. If on the default branch, branch first.
-- Before deletes, overwrites, or pushes, show me exactly what will change and
-  confirm first.

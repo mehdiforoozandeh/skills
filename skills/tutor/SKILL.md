@@ -1,17 +1,10 @@
 ---
 name: tutor
 description: >-
-  Interactive multiple-choice teaching drill on a subject the user doesn't know yet.
-  Requires a grounding source (the user names one, or it asks, or it searches out a credible
-  one), shows the syllabus for approval, then climbs a general → specific knowledge tree one
-  question at a time: right answers get a one-line why and the next question, wrong answers
-  get a short correction and more questions around the gap. Fast back-and-forth, no walls of
-  text, no memory between sessions. Use when the user wants to learn a subject by being asked
-  rather than lectured — including "quiz me on X" where X is a subject rather than something
-  we built. NOT for performing a task right now ("teach me how to fix this error"), and NOT
-  open-ended brainstorming (use `pingpong`). Triggers: /tutor, "teach me X", "tutor me on X",
-  "help me learn X", "crash course on X", "I don't know anything about X", "read this and
-  teach it to me", "walk me up from the basics".
+  Teach a subject the user does not know yet with multiple-choice questions, from basics
+  up, grounded in a source. Right answers get a one-line why; wrong ones get a short
+  fix. Triggers: "teach me X", "tutor me on X", "crash course on X", "quiz me on X"
+  where X is a subject, not our work.
 license: MIT
 metadata:
   author: Mehdi Foroozandeh

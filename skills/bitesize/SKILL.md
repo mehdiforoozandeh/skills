@@ -1,16 +1,10 @@
 ---
 name: bitesize
 description: >-
-  Small-step research mode: the opposite of a big upfront plan. The agent and the user
-  take one small step (a "bite") at a time toward a stated end goal. Each bite: the agent
-  frames where we are against the goal, lays out 2–3 possible next steps with cost, what
-  each would teach, and a lean; the user asks questions until satisfied and MAKES the
-  decision (often something not on the list); the agent or its subagents run only that
-  step and report the outcome, what it means for the goal, and doubts. Messages capped at
-  450 words. Use for scientific research, or any work where the user wants to steer every
-  step, learn as they go, and keep a quick feedback loop instead of trusting a long
-  autonomous run. Triggers: /bitesize, "one step at a time", "small steps", "let me make
-  the calls", "don't plan it all out", "step by step with me".
+  Small-step mode: one small step at a time toward a stated goal. The agent lays out 2–3
+  next steps; the user makes each call. Use for research or any work he wants to steer
+  step by step. Triggers: "bitesize", "one step at a time", "small steps", "let me make
+  the calls", "don't plan it all out".
 license: MIT
 metadata:
   author: Mehdi Foroozandeh
@@ -87,6 +81,10 @@ reports. But always say, briefly:
 - **doubts** — whatever could make it wrong: small n, a confound, a bug risk, a fix made
   mid-run.
 
+When a bite produces a written result report (a file, not the chat message), ask how
+many minutes the user will spend reading it, and size the report to that. Overflow goes to
+a supplement file that is not meant to be read.
+
 Then **stop**. Do not attach the next frame and choices to a result — the next options
 would steer how the user reads it. Let them react first: the "What I need from you" block
 asks only for their read of the result (with crux, the acceptance question below), never
@@ -142,7 +140,9 @@ chat. The user should be able to work in bitesize for weeks without noticing cru
   Record it as the hypothesis, its checks and its null.
 - **Accepting a conclusion** is a plain science question inside the report: *"Do you buy
   that this supports X?"* A conversational yes is the sign-off; record it silently. Never
-  record a conclusion or verdict the user did not accept.
+  record a conclusion or verdict the user did not accept. Inside a bitesize session every finding or
+  verdict waits for the user's yes. This overrides the crux core rule that the agent
+  settles findings itself.
 
 If there is no vault, log nothing. The conversation is the record.
 
