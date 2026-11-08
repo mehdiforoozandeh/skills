@@ -87,6 +87,10 @@ reports. But always say, briefly:
 - **doubts** — whatever could make it wrong: small n, a confound, a bug risk, a fix made
   mid-run.
 
+When a bite produces a written result report (a file, not the chat message), ask how
+many minutes the user will spend reading it, and size the report to that. Overflow goes to
+a supplement file that is not meant to be read.
+
 Then **stop**. Do not attach the next frame and choices to a result — the next options
 would steer how the user reads it. Let them react first: the "What I need from you" block
 asks only for their read of the result (with crux, the acceptance question below), never
@@ -142,7 +146,9 @@ chat. The user should be able to work in bitesize for weeks without noticing cru
   Record it as the hypothesis, its checks and its null.
 - **Accepting a conclusion** is a plain science question inside the report: *"Do you buy
   that this supports X?"* A conversational yes is the sign-off; record it silently. Never
-  record a conclusion or verdict the user did not accept.
+  record a conclusion or verdict the user did not accept. Inside a bitesize session every finding or
+  verdict waits for the user's yes. This overrides the crux core rule that the agent
+  settles findings itself.
 
 If there is no vault, log nothing. The conversation is the record.
 
