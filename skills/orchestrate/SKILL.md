@@ -24,7 +24,7 @@ resource: every repo file you open, every transcript you skim, every test suite 
 inline pushes you toward the dumb zone, the point where a long context makes you slower
 and worse. Everything below exists to keep you out of it.
 
-Load the `dispatch` skill before the first spawn, and run its quota gate. Dispatch picks
+Load the `dispatch` skill before the first spawn. Dispatch picks
 the model tier for every agent below. This skill picks what each agent does.
 
 Two facts about the harness, verified on this machine, shape the mechanics:

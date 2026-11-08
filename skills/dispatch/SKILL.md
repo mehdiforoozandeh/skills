@@ -52,7 +52,8 @@ writes the word — *fable*, or a specific model ID. A capability request ("use 
 model", "this one's hard, go all out") is **not** naming it: that caps at `opus`.
 
 **Haiku exists only in the swarm lane.** A lone Haiku agent is never the right call — if
-it's worth one agent, it's worth Sonnet.
+it's worth one agent, it's worth Sonnet. The one exception: a hook-run headless capture, such as
+crux's background sweep, may use a lone Haiku agent.
 
 ## The grok lane — a different meter
 
@@ -86,28 +87,6 @@ spends the other meter, so when in doubt go up.
 Grok runs in its own process and **cannot see this conversation**. A thin answer almost
 always means a thin brief. Mechanics, brief format and failure modes are in
 `references/grok.md` — read it before the first grok call of a session.
-
-## Quota gate
-
-Before a batch that will spend real tokens, check what is left:
-
-```
-~/.claude/bin/claude-quota
-```
-
-| Reading | Route |
-|---|---|
-| Fresh · 5-hour < 80% **and** 7-day < 75% | By the lanes above |
-| Fresh · 5-hour ≥ 80% **or** 7-day ≥ 75% | Send every checkable Claude-lane agent to grok instead, and say why |
-| **Stale · missing · `NO DATA`** | By the lanes above, and say "quota unknown" out loud |
-
-Gate at 80 rather than 95: the turn that checks the quota also spends it. The 7-day window
-gets the tighter gate because it refills over days, not hours.
-
-**Never read a missing cache as "near the limit."** `NO DATA` is the normal state on this
-machine — the cache is only written when Claude Code invokes the custom `statusLine`
-command, and the desktop app does not. Treating absence as a limit signal would route
-everything to grok forever, silently.
 
 ## Escalations
 
@@ -190,6 +169,4 @@ opus came back thin                                    → sharpen the brief, sa
 
 token-heavy AND you can check the answer cheaply       → grok  (Cursor meter)
 token-heavy but you cannot check it                    → opus
-5h ≥ 80% or 7d ≥ 75%, reading fresh                    → shift checkable work to grok
-quota reading stale / missing / NO DATA                → route normally, say so
 ```
