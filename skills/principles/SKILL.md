@@ -32,7 +32,8 @@ Done when every picked principle has either changed the plan or been named as al
   the prototype is ready.
 - [`iterative-deployment`](principles/iterative-deployment.md) -- Deliver a long-running
   research task in iterations of days, in the order a paper is written: Methods first, then
-  results, discussion and conclusions, each iteration a result that stands on its own.
+  results, discussion and conclusions, each iteration a result that stands on its own. Use
+  the fewest iterations, each with the maximum number of parallel paths.
 
 ## Add a principle
 

@@ -13,6 +13,10 @@ work in one shot.
 - Results, discussion and conclusions are added little by little, as each one is ready.
 - Each iteration ends with a meaningful, reasonable piece of scientific progress that
   stands on its own, i.e. a result or an insight that can be shown.
+- Use the fewest iterations possible. Inside each iteration, parallelize as much as
+  possible. An iteration is defined by its set of parallel paths, i.e. runs and objectives
+  that are pursued at the same time. Put the maximum number of parallel paths in each
+  iteration; start a new iteration only for work that needs the results of the one before.
 - Aim for good, conclusive results early, in days. Scale the ambition of an iteration down
   until it fits. The more time-consuming parts move to later phases, for the completion of
   the work.
@@ -29,5 +33,8 @@ judged, presented and used to steer the next iteration.
 - Does that deliverable stand on its own, without the later phases?
 - Which parts of the plan are time-consuming and not needed for the next deliverable? Move
   them to a later phase and say so.
+- Which paths of this iteration can run at the same time? Is anything in a later iteration
+  that needs no result of this one? If so, move it into this iteration.
+- Is the number of iterations the smallest that the dependencies allow?
 - If the estimate of an iteration is over a few days, what is the smaller version of it
   that still gives a conclusive result?
