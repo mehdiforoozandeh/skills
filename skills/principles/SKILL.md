@@ -30,6 +30,9 @@ Done when every picked principle has either changed the plan or been named as al
 - [`core-before-scale`](principles/core-before-scale.md) -- Find and tune the idea on the
   smallest prototype in fast cycles. Scale only when the problem needs it, and only after
   the prototype is ready.
+- [`iterative-deployment`](principles/iterative-deployment.md) -- Deliver a long-running
+  research task in iterations of days, in the order a paper is written: Methods first, then
+  results, discussion and conclusions, each iteration a result that stands on its own.
 
 ## Add a principle
 
