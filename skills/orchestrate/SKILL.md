@@ -74,6 +74,7 @@ Goal: <one sentence>
 Owns: <exact file paths, exclusive within the wave>
 Interfaces: <signatures or contracts other chunks rely on, pinned here>
 Depends on: <chunk ids or none>
+Serves: <ledger row ids from .longrun/GOALS.md, or none when there is no longrun run>
 Test: <command, run with the repo root as working directory>
 
 ## Decisions needed
@@ -93,6 +94,7 @@ with the broken rule named, and stop if the second plan breaks one too.
 - Every chunk is one agent, one sitting, no questions.
 - Every acceptance criterion is a command with an expected result, not a sentence.
 - Owned test files are named by path, never as a directory.
+- In a longrun run, every chunk serves at least one ledger row.
 
 **Plan review.** Before any builder launches, spawn one fresh read-only reviewer with the
 plan file path. It has not seen the planning, so it reads the plan cold. Dispatch puts it
@@ -157,7 +159,8 @@ brief contains, in this order:
    "<id> <name>"`. Without it the branch is empty and there is nothing to merge.
 7. The working rules, pasted: "Report what failed and why, and what you did not check.
    Compare every effect with seed noise before you report it. Give every long job a
-   cheap progress check in its first 30 minutes. Keep tool output small."
+   cheap progress check in its first 30 minutes. Keep tool output small. Submit
+   cluster jobs, record their ids on the slip, and return: the foreman owns waiting."
 8. The return slip format below, and: "Return the slip and nothing else. No ELI5, no
    TL;DR, no 'What I need from you' block. The Open line is the only place for an ask."
    Builders inherit the global CLAUDE.md, and without this line they append all three.
@@ -173,6 +176,10 @@ Builders report back through task notifications. Do not poll, do not read their
 transcripts, do not run their tests while they run. If nothing is running that you could
 act on, end the turn and wait.
 
+Cluster jobs that builders submitted are yours to watch: one watch per batch, with an
+exit condition and a time limit, never one per job. A notification that brings no new
+result gets a one-line turn.
+
 ### 4. Review a return slip
 
 **The return slip.** Every builder returns exactly this, under 150 words plus the test
@@ -184,6 +191,8 @@ Branch: <name>   Base: <sha and subject>
 Commit: <sha>
 Files changed: <paths>
 Tests: <command> → <pass/fail, counts, failing lines if any>
+Serves: <ledger row ids, or none>
+Cost: <measured CPU-h / GPU-h with the command that measured it, or none>
 Deviations from the brief: <none, or what and why>
 Failed: <none, or what failed and why>
 Not checked: <none, or what you did not check>
@@ -257,6 +266,21 @@ the mismatches, then send the report:
   `<repo parent>/.orchestrate-wt/`, and the `chunk/*` branches. You do not remove them. Give the
   cleanup commands and let the user run them, per the tidy rule in CLAUDE.md.
 - The "What I need from you" block, per CLAUDE.md.
+
+## Nesting
+
+A builder may spawn its own workers only when the brief names it a lead: it owns an
+independent subtree (for example one literature sweep per subtopic, or one read-only
+audit per section) that is too big for one context. Rules for a lead:
+
+- Depth is capped at 2: the foreman, leads, workers. Workers get no Agent tool.
+- Writing chunks stay at depth 1: two writers below one lead cannot share files.
+- The lead writes its own plan file before it spawns, and checks each worker's claims
+  against the artifact before it returns its slip.
+- The lead returns one slip for the subtree.
+
+One level of fan-out gives most of the speed-up; each extra level adds a brief, a
+lossy summary and a merge. Use a lead only when a flat wave would not fit.
 
 ## Guardrails
 
