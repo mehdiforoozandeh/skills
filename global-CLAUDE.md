@@ -33,6 +33,8 @@ The last block of every message is one of two forms. Nothing comes after it.
 
 **Nothing is blocked on me:** write exactly `Nothing needed from you, for now!`
 
+**A turn started by a background notification with no new result** ends with one line saying so, and no block. Repeat the open items only when they change.
+
 When I must decide, ask with AskUserQuestion: one batch, with your recommendation first. Do not put here anything you can resolve yourself.
 
 ## Scope of work
