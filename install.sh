@@ -76,6 +76,16 @@ if $do_core && [[ -d "$REPO_DIR/agents" ]]; then
   done
 fi
 
+if $do_core && [[ -f "$REPO_DIR/global-CLAUDE.md" ]]; then
+  echo "== global CLAUDE.md =="
+  dest="$HOME/.claude/CLAUDE.md"
+  if [[ -e "$dest" && ! -L "$dest" ]]; then
+    backup="$dest.bak.$(date +%Y%m%d%H%M%S)"
+    mv "$dest" "$backup"; echo "  (backed up existing file to $backup)"
+  fi
+  ln -sfn "$REPO_DIR/global-CLAUDE.md" "$dest"; echo "  ✓ CLAUDE.md"; linked=$((linked+1))
+fi
+
 if $do_external; then
   echo "== external skills (from $MANIFEST) =="
   if [[ ! -f "$MANIFEST" ]]; then

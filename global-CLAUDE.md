@@ -74,3 +74,13 @@ On work that runs over about 30 minutes, report status at each milestone as a ta
 ## When context gets long
 Before and after compacting, restate in 3 lines what we are doing, what we decided, and what is left. Keep exact file paths, commands and error text.
 
+## Environment
+- macOS, zsh. Prefer absolute paths; avoid `cd` in compound commands.
+- Skills repo: `~/skills` (github.com/mehdiforoozandeh/skills), symlinked into `~/.claude/skills/`.
+- GitHub auth on this Mac is HTTPS, not SSH.
+
+## HPC clusters (Fir primary, Nibi failover)
+Reach both through the `hpc` command. Load the `hpc-workspace` and `slurm-hpc` skills for the rest.
+- Always pass `-o BatchMode=yes` to raw `ssh`/`rsync`.
+- If a command exits 69, the tunnel is down. Tell me to run `hpc up fir`, and wait. Never authenticate on my behalf.
+- Datasets never come to this laptop. Cluster-to-cluster moves go through Globus.
