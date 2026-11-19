@@ -137,14 +137,16 @@ is yours.
 [`global-CLAUDE.md`](global-CLAUDE.md) is the `~/.claude/CLAUDE.md` these skills are
 written against: response format, the "What I need from you" closing block, scope
 bright lines, the check-the-authority rules, and delegating rules that point at
-`dispatch`. Copy it to `~/.claude/CLAUDE.md` to use it.
+`dispatch`. `install.sh` symlinks it to `~/.claude/CLAUDE.md` (an existing real file is
+backed up first), so edits land here, not in `~/.claude`.
 
 ## Repository layout
 
 ```
 skills/<name>/SKILL.md   # one directory per skill (flat catalog)
 external-skills.txt       # curated third-party skills (references, not vendored)
-install.sh                # bootstrap: symlink core + external into ~/.claude/skills
+install.sh                # bootstrap: symlink core + external into ~/.claude/skills, CLAUDE.md into ~/.claude
+sync.sh                   # SessionStart hook: fast-forward main, re-run install.sh
 ```
 
 New skills are added as additional `skills/<name>/` folders; third-party skills are
