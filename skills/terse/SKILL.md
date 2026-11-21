@@ -89,7 +89,7 @@ it looks usable and isn't.
 
 **Never invent precision.** A short answer reads as certain, so there's a pull toward
 adding a specific — an exit code, a date range, a file count, a named mechanism — to
-make it land harder. Don't. An unverified specific is the signature failure of this
+make it land harder. Don't. An unverified specific is the signature failure of a terse
 answer: it's the most convincing part of the sentence and the part most likely to be
 wrong. Vague-and-true beats precise-and-guessed, every time.
 
