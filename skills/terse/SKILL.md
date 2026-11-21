@@ -1,21 +1,24 @@
 ---
 name: terse
 description: >-
-  Rapid-fire mode: answer in at most 2–3 sentences, often one word, like a colleague
-  across a desk; the rest waits to be asked for. Use for a queue of quick questions.
-  Triggers: "be super brief", "super short", "quick answers", "rapid fire", "keep it
-  moving".
+  One terse answer: the next reply only, in at most 2–3 sentences, often one word,
+  like a colleague across a desk; the rest waits to be asked for. Applies to one turn,
+  then normal length resumes. Triggers: "/terse", "be super brief", "super short",
+  "short answer".
 license: MIT
 metadata:
   author: Mehdi Foroozandeh
-  version: "1.0"
+  version: "2.0"
 ---
 
 # terse — answer like a coworker, not a document
 
 In a real meeting nobody talks for two pages per turn. They say a sentence or two and
-hand it back. That's the mode: the user has a queue of questions and wants to keep
-firing, so every reply must be cheap to read and fast to react to.
+hand it back. The user wants this one answer cheap to read and fast to react to.
+
+**Scope: one turn.** These rules govern the reply to the message that invoked the skill,
+and only that reply. The turn after it returns to normal length, unless the user asks
+for terse again.
 
 ## The rule
 
@@ -54,14 +57,14 @@ you're answering. Silence at the end is correct.
 
 Prose sentences, nothing else. No headers, no bullet lists, no bold-for-scanning, no
 ELI5 or TL;DR footers — the whole reply is already shorter than a TL;DR. No preamble, no
-restating the question, no sign-off. If you're formatting, you've broken the mode.
+restating the question, no sign-off. If you're formatting, you've broken the rules.
 
 ## The cap is on talking, not on working
 
-Do the same reading, the same tool calls, the same checking you'd do in any other mode.
+Do the same reading, the same tool calls, the same checking you'd do in a normal answer.
 This compresses the answer, never the effort behind it.
 
-A confident wrong answer in one sentence is the worst thing this mode can produce. It's
+A confident wrong answer in one sentence is the worst thing a terse answer can be. It's
 fast, it reads as certain, and it costs the user the rest of the afternoon. Short makes
 every mistake cheaper to send and more expensive to catch, so the bar for *checking*
 goes up here, not down.
@@ -87,7 +90,7 @@ it looks usable and isn't.
 **Never invent precision.** A short answer reads as certain, so there's a pull toward
 adding a specific — an exit code, a date range, a file count, a named mechanism — to
 make it land harder. Don't. An unverified specific is the signature failure of this
-mode: it's the most convincing part of the sentence and the part most likely to be
+answer: it's the most convincing part of the sentence and the part most likely to be
 wrong. Vague-and-true beats precise-and-guessed, every time.
 
 **Order of survival.** When you're picking what makes the cut:
@@ -112,7 +115,7 @@ neatly and let the better move go unmentioned because it wouldn't fit.
 - **A rule the user is bound by** — a repo convention, a cluster policy. Advice that
   quietly violates one is worse than no advice.
 
-**Never compress a risk into a reassurance.** This is the one way this mode can actively
+**Never compress a risk into a reassurance.** This is the one way a terse answer can actively
 hurt someone. Half of a safety fact often reads as comfort: *"there's a nightly backup"*
 is true and lands as *"you're covered"*, when the honest short version was *"you can't
 restore it yourself — that's a support ticket."* If the compressed form would make the
@@ -125,11 +128,9 @@ only permitted overflow, and it's not optional.
 
 The cap is on your talking, not your output. Code, files, commands, diffs, and anything
 the user asked you to produce come out at whatever size they need — a 40-line script
-counts as one turn of conversation. Same when the user asks to go deep: "explain that
-properly", "walk me through it", "write it up". Give them the full thing, then drop back
-to terse on the next turn.
+counts as one turn of conversation.
 
-## What breaks the mode
+## What breaks a terse answer
 
 - A paragraph where a sentence would do.
 - Bullets, headers, or a numbered list.
@@ -161,6 +162,6 @@ Right — same length, but the numbers and the flag survived:
 
 ## Activation
 
-`/terse` or any trigger turns it on, and it **stays on** — every turn until the user says
-"stop terse", "normal mode", or asks for depth. The whole point is a run of questions, so
-don't quietly drift back to full length after a turn or two.
+`/terse` or a trigger phrase applies these rules to the reply it is attached to. The
+next turn is written at normal length. A user who wants the next answer terse too
+types `/terse` again.
