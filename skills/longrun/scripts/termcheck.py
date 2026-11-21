@@ -2,16 +2,16 @@
 """termcheck: flag terms an agent introduces that the PI has not used and that the
 glossary does not register.
 
-A term is the PI's when the PI typed it (pi_vocab.txt, pi_phrases.txt) or confirmed it
-as known. Instruction documents do not count: agents often draft them.
+A term is the PI's when the PI typed it in chat (pi_vocab.txt, pi_phrases.txt), wrote it
+in the instruction folder (protected= in .longrun/config, read live), or confirmed it as
+known.
 
 Rules, in order, for each word of prose (code spans, paths, URLs and numbers skipped):
   1. known: the word or its stem is in pi_vocab.txt, or in a GLOSSARY.md term;
   2. ordinary English: wordfreq Zipf >= ZIPF (default 3.5);
   3. otherwise flagged ("rare").
-Coined labels (letters mixed with digits, or snake_case) in prose are flagged unless the
-PI typed them, the glossary registers them, or they appear in the PI's instruction folder
-(the PI's own labels, such as decision ids). Accessions, hashes and chromosome names pass.
+Coined labels (letters mixed with digits, or snake_case) in prose are flagged unless they
+are the PI's or registered. Accessions, hashes, chromosome and histone-mark names pass.
 Ordinary words used as a new name ("oracle floor") cannot be told apart from plain
 phrases by counts alone (measured on a 7-day run). The check therefore only counts
 phrases; `candidates` lists the repeated ones for the auditor to judge.
@@ -20,7 +20,6 @@ Commands (run with the longrun venv python):
   seed [--before ISO]        add the PI's typed words from all Claude Code transcripts
   known <term>...            mark terms as the PI's (no glossary row needed)
   check [--file F] [--count] print flagged terms for text on stdin or in F, as JSON
-  docs <folder>              list candidate terms in the PI's instruction documents
   candidates [--since ISO]   repeated phrases the PI never typed, for the auditor
   lint                       check GLOSSARY.md rows against the entry rules
   settle --unknown <t>...    the PI names unknown terms; all other open candidates become known
@@ -72,7 +71,6 @@ def strip_code(text):
 def typed_only(text):
     """Keep only what a human typed: drop pasted blocks and harness-injected messages."""
     text = re.sub(r"<pasted_content[^>]*>.*?</pasted_content[^>]*>", " ", text, flags=re.S)
-    text = re.sub(r"\"[^\"\n]{1,60}\"|\u201c[^\u201d\n]{1,60}\u201d", " ", text)   # quoted = mentioned, not used
     text = text.strip()
     if not text or text.startswith("<") or len(text) > 3000:
         return ""
@@ -149,9 +147,10 @@ class Run:
             self.gloss_words |= set(words(t))
         p = os.path.join(self.dir, "term_counts.json")
         self.counts = json.load(open(p)) if os.path.exists(p) else {}
-        self.doc_labels = self._doc_labels()
+        self.doc_labels = self._doc_vocab()
 
-    def _doc_labels(self):
+    def _doc_vocab(self):
+        """Words, phrases and labels in the PI's instruction folder count as the PI's."""
         prot = ""
         cfg = os.path.join(self.dir, "config")
         if os.path.exists(cfg):
@@ -161,7 +160,10 @@ class Run:
         out = set()
         if prot:
             for f in glob.glob(os.path.join(self.root, prot, "**", "*.md"), recursive=True):
-                out |= set(m.group(0).lower() for m in LABEL.finditer(open(f, errors="ignore").read()))
+                text = open(f, errors="ignore").read()
+                out |= set(m.group(0).lower() for m in LABEL.finditer(text))
+                self.vocab |= set(words(text))
+                self.pi_phrases |= phrases(text)
         return out
 
     def _lines(self, name):
@@ -311,24 +313,6 @@ def cmd_check(run, args):
         run.save_counts()
 
 
-def cmd_docs(run, args):
-    folder = args[0]
-    counts = {}
-    text_all = ""
-    ref = re.compile(r"(et al\.|arXiv|doi\.org|doi:|\b(19|20)\d\d[a-z]?\)|Proceedings|Journal|Conference)", re.I)
-    for f in sorted(glob.glob(os.path.join(folder, "**", "*.md"), recursive=True)):
-        text = "\n".join(l for l in open(f, errors="ignore").read().splitlines() if not ref.search(l))
-        text_all += text + "\n"
-        for p in phrases(text):
-            counts[p] = counts.get(p, 0) + text.lower().count(p)
-    rare = [f for f in check(run, text_all) if f["kind"] != "repeated phrase"]
-    reps = sorted((p for p, n in counts.items() if n >= 3 and not run.known_phrase(p)),
-                  key=lambda p: -counts[p])
-    print(json.dumps({"words_and_labels": rare,
-                      "repeated_phrases": [{"term": p, "count": counts[p]} for p in reps[:80]]},
-                     indent=1))
-
-
 def cmd_candidates(run, args):
     since = args[args.index("--since") + 1][:10] if "--since" in args else ""
     rows = [(p, r) for p, r in run.counts.items()
@@ -371,16 +355,12 @@ def cmd_lint(run, args):
 
 
 def cmd_settle(run, args):
-    """The PI names the terms they do not know; every other open candidate becomes known.
-    Open candidates: glossary_candidates.json terms and GLOSSARY.md rows with status proposed."""
+    """The PI names the terms they do not know; every other GLOSSARY.md row with status
+    proposed becomes known."""
     unknown = set(a.lower().strip(",") for a in args if a != "--unknown")
-    cands = set()
-    cpath = os.path.join(run.dir, "glossary_candidates.json")
-    if os.path.exists(cpath):
-        d = json.load(open(cpath))
-        cands |= set(x["term"] for x in d.get("words_and_labels", []))
     gpath = os.path.join(run.dir, "GLOSSARY.md")
     lines = open(gpath).read().splitlines() if os.path.exists(gpath) else []
+    known = []
     for i, line in enumerate(lines):
         cells = [c.strip() for c in line.strip().strip("|").split("|")]
         if line.startswith("|") and len(cells) >= 4 and cells[3].lower() == "proposed":
@@ -389,17 +369,10 @@ def cmd_settle(run, args):
                 continue
             cells[3] = "known"
             lines[i] = "| " + " | ".join(cells) + " |"
-            cands.discard(term)
-    known = sorted(cands - unknown)
-    with open(os.path.join(run.dir, "pi_vocab.txt"), "a") as f:
-        f.write("".join(t + "\n" for t in known))
+            known.append(term)
     open(gpath, "w").write("\n".join(lines) + "\n")
-    if os.path.exists(cpath):
-        d["words_and_labels"] = [x for x in d.get("words_and_labels", []) if x["term"] in unknown]
-        json.dump(d, open(cpath, "w"), indent=1)
     log(run, f"glossary: PI settled terms; unknown: {', '.join(sorted(unknown)) or 'none'}")
-    print(f"marked {len(known)} candidates known; {len(unknown)} need a glossary row: "
-          + ", ".join(sorted(unknown)))
+    print(f"marked {len(known)} proposed rows known; still proposed: " + ", ".join(sorted(unknown)))
 
 
 def cmd_known(run, args):
@@ -486,7 +459,7 @@ def cmd_hook_file(_, __):
         print(json.dumps({"decision": "block", "reason": message(flags, rel)}))
 
 
-COMMANDS = {"seed": cmd_seed, "check": cmd_check, "docs": cmd_docs, "known": cmd_known,
+COMMANDS = {"seed": cmd_seed, "check": cmd_check, "known": cmd_known,
             "candidates": cmd_candidates, "lint": cmd_lint, "settle": cmd_settle,
             "hook-user": cmd_hook_user, "hook-stop": cmd_hook_stop, "hook-file": cmd_hook_file}
 

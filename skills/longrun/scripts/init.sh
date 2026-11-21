@@ -16,6 +16,4 @@ if [[ -e "$root/.longrun/config" ]]; then echo "kept config"; else
 fi
 py="$HOME/.claude/longrun-venv/bin/python"; [[ -x "$py" ]] || py=/usr/bin/python3
 if [[ ! -s "$root/.longrun/pi_vocab.txt" ]]; then (cd "$root" && "$py" "$here/termcheck.py" seed); fi
-(cd "$root" && "$py" "$here/termcheck.py" docs "$root/$prot" > "$root/.longrun/glossary_candidates.json") \
-  && echo "glossary candidates from the instructions folder: .longrun/glossary_candidates.json"
 "$here/log.sh" --root "$root" "longrun initialized (protected=$prot, job_prefix=$prefix)"

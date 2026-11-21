@@ -31,8 +31,8 @@ too.
 | `GOALS.md` | The requirements ledger: one row per requirement in the PI's docs, with tier, status and evidence. | none |
 | `DECISIONS.md` | Decisions in force, one table row each, with verbatim source, provenance and what each supersedes. | 10 KB |
 | `STATE.md` | The state page: the goal now, what is in flight, the next 3 steps, the open asks to the PI. | 5 KB |
-| `GLOSSARY.md` | Every term in use that the PI did not type and that is not ordinary English, with a gloss, origin and status. Persistent for the project. | none |
-| `pi_vocab.txt`, `pi_phrases.txt` | Every word and two-word phrase the PI typed, in any session. Maintained by a hook. | none |
+| `GLOSSARY.md` | Every term in use that the PI has not used and that is not ordinary English, with a gloss, origin and status. Persistent for the project. | none |
+| `pi_vocab.txt`, `pi_phrases.txt` | Every word and two-word phrase the PI typed in chat, in any session. Maintained by a hook. Words in the instructions folder count as the PI's too, read live. | none |
 | `LOG.md` | Append-only events, written only by `scripts/log.sh`, which stamps the clock. | 60 KB, rotates |
 | `config` | `protected=` (the PI's instructions folder), `job_prefix=`, `cluster_exec=`, `pi_files=` (comma-separated globs of files written for the PI). | |
 
@@ -57,9 +57,8 @@ parent, `~/.claude/skills/longrun`.
    relative to the repo root> <job prefix> [cluster exec]`. The job prefix is a short
    name that every cluster job of this run starts with (for example `myrun_`). The
    cluster exec is the command that runs a command on the cluster, for example
-   `hpc run`. It also seeds `pi_vocab.txt` from every message the PI typed in Claude Code
-   and writes `glossary_candidates.json`: the terms in the instructions folder that the
-   PI never typed. Done when `.longrun/` holds all its files.
+   `hpc run`. It also seeds `pi_vocab.txt` from every message the PI typed in Claude Code.
+   Done when `.longrun/` holds all its files.
 2. **Build the ledger.** Spawn one reader agent (dispatch: Read lane) with the
    instructions folder. It writes nothing; it returns ledger rows. One row per sentence
    that asks for something: every end goal, deliverable, named ablation, metric,
@@ -75,14 +74,7 @@ parent, `~/.claude/skills/longrun`.
    - every metric or rule that cannot be executed as written (a missing unit,
      denominator, clipping or tie rule), each with a recommended fix.
    Write the answers into `GOALS.md`, `DECISIONS.md` (provenance `PI`) and `STATE.md`.
-4. **Settle the vocabulary.** Show the PI the terms in `glossary_candidates.json` as one
-   comma-separated list and ask for the ones the PI does not know. Word frequency cannot
-   predict this: on one project the PI knew 187 of 199 candidates, and the unknown ones
-   ranged from Zipf 0 to 2.9. Run `termcheck.py settle --unknown <terms>`: every other
-   candidate becomes the PI's word. Write a `GLOSSARY.md` row with a gloss for each
-   unknown term. The run does not wait for the answer. Done when the PI has answered,
-   `settle` has run, and `termcheck.py lint` passes.
-5. **Plan.** Run `orchestrate` step 1. Brief the planner with `GOALS.md`,
+4. **Plan.** Run `orchestrate` step 1. Brief the planner with `GOALS.md`,
    `DECISIONS.md` and the horizon. Every chunk cites the ledger rows it serves. The plan
    fits the horizon and produces a first measured result inside the first day, on a
    cheap proxy if the full scorer is not ready.
@@ -105,20 +97,20 @@ row. A decision that changes an earlier one marks the earlier row `superseded by
 A choice that contradicts a decision in force is a question to the PI, never a quiet
 deviation.
 
-**Terms.** The PI's vocabulary is what the PI typed. Instruction documents do not count,
-because agents help draft them. A term that is neither the PI's, nor registered, nor
-ordinary English needs a `GLOSSARY.md` row before its first use in anything the PI reads,
-or a conventional term the PI uses instead. This holds for field terms too: "pileup" and
-"autoencoder" are standard, and the PI still wanted them registered. It holds most of all
-for an ordinary word used as a new name ("oracle floor", "replicate ladder", "screening"
-for a first pass): register the name the first time it names something.
+**Terms.** The PI's vocabulary is every word the PI typed in chat or wrote in the
+instructions folder. A term that is neither the PI's, nor registered, nor ordinary English
+needs a `GLOSSARY.md` row before its first use in anything the PI reads, or a term the PI
+uses instead. Field terms get no exemption: being standard in the field does not make a
+term the PI's. Most of all, register an ordinary word used as a new name ("oracle floor",
+"replicate ladder", "screening" for a first pass) the first time it names something.
 - Row rules: one row per concept, one term per concept, a gloss of 1 to 10 words that
   does not use the term, origin `PI doc`, `agent` or `field`, status `proposed`.
 - The Stop hook catches rare words and coined labels such as `p16_sv`. It cannot catch
   an ordinary word used as a name; that rule is yours, and the auditor checks it.
-- Most flagged terms are ones the PI knows. Register each anyway, with status
-  `proposed`. At each milestone, show the PI the new `proposed` terms as one list, ask for
-  the unknown ones, and run `settle --unknown <terms>`; the rest become `known`.
+- Many flagged terms are ones the PI knows; word frequency cannot predict which. Register
+  each anyway, with status `proposed`. At each milestone, show the PI the new `proposed`
+  terms as one comma-separated list, ask for the unknown ones, and run
+  `termcheck.py settle --unknown <terms>`; the rest become `known`.
 - Text for the PI uses glossary terms and plain words; chunk ids, kit ids and dataset
   version codes stay in the plan and the log.
 
