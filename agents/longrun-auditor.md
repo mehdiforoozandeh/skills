@@ -31,7 +31,8 @@ Report on these five checks, each one exhaustive:
    phrases the PI never typed. Judge each: is it an ordinary word or phrase used as the
    name of a specific thing in this run ("oracle floor", "replicate ladder", "return slip")?
    List every such name that has no `GLOSSARY.md` row. Also run `termcheck.py lint` and
-   report its problems, and give the count of rows with status `proposed`.
+   report its problems, and list the terms of rows with status `proposed` as one
+   comma-separated line, for the PI to name the unknown ones.
 4. **Contradictions.** Work, code or text that contradicts a decision in force, and
    decisions in force that contradict a later PI message in `LOG.md` or a newer
    decision without a `superseded` mark.

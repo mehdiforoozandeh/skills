@@ -23,6 +23,7 @@ Commands (run with the longrun venv python):
   docs <folder>              list candidate terms in the PI's instruction documents
   candidates [--since ISO]   repeated phrases the PI never typed, for the auditor
   lint                       check GLOSSARY.md rows against the entry rules
+  settle --unknown <t>...    the PI names unknown terms; all other open candidates become known
   hook-user                  UserPromptSubmit hook: add the typed prompt to pi_vocab
   hook-stop                  Stop hook: check the reply; block once, then log
   hook-file                  PostToolUse hook: check files meant for the PI
@@ -51,7 +52,8 @@ each many several next last same other another""".split())
 
 WORD = re.compile(r"[A-Za-z][A-Za-z']*[A-Za-z]|[A-Za-z]")
 LABEL = re.compile(r"\b(?:[A-Za-z]+\d+[A-Za-z0-9]*|[A-Za-z0-9]+_[A-Za-z0-9_]+)\b")
-PASS_LABEL = re.compile(r"^(?:ENC[A-Z]{2}\d{3}[A-Z]{3}|[0-9a-f]{7,40}|chr[0-9XYM]+|v\d+|\d+[a-z]{1,3})$", re.I)
+PASS_LABEL = re.compile(r"^(?:ENC[A-Z]{2}\d{3}[A-Z]{3}|[0-9a-f]{7,40}|chr[0-9XYM]+|v\d+|\d+[a-z]{1,3}"
+                        r"|H2A[XZ]?|H2B|H3(?:\.3)?|H4|(?:H2A|H2B|H3|H4)[KRST]\d+(?:me[123]?|ac|ph|ub)?)$", re.I)
 IRREGULAR = {"strata": "stratum", "data": "datum", "criteria": "criterion",
              "matrices": "matrix", "indices": "index", "analyses": "analysis"}
 
@@ -96,6 +98,10 @@ def stems(w):
             out.add(w[: -len(suf)] + rep)
     if w in IRREGULAR:
         out.add(IRREGULAR[w])
+    for pre in ("un", "re", "over", "under", "non", "mis", "pre"):
+        for x in list(out):
+            if x.startswith(pre) and len(x) - len(pre) >= 4:
+                out.add(x[len(pre):])
     return out
 
 
@@ -364,6 +370,38 @@ def cmd_lint(run, args):
     sys.exit(1 if probs else 0)
 
 
+def cmd_settle(run, args):
+    """The PI names the terms they do not know; every other open candidate becomes known.
+    Open candidates: glossary_candidates.json terms and GLOSSARY.md rows with status proposed."""
+    unknown = set(a.lower().strip(",") for a in args if a != "--unknown")
+    cands = set()
+    cpath = os.path.join(run.dir, "glossary_candidates.json")
+    if os.path.exists(cpath):
+        d = json.load(open(cpath))
+        cands |= set(x["term"] for x in d.get("words_and_labels", []))
+    gpath = os.path.join(run.dir, "GLOSSARY.md")
+    lines = open(gpath).read().splitlines() if os.path.exists(gpath) else []
+    for i, line in enumerate(lines):
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if line.startswith("|") and len(cells) >= 4 and cells[3].lower() == "proposed":
+            term = cells[0].strip("`*").lower()
+            if term in unknown:
+                continue
+            cells[3] = "known"
+            lines[i] = "| " + " | ".join(cells) + " |"
+            cands.discard(term)
+    known = sorted(cands - unknown)
+    with open(os.path.join(run.dir, "pi_vocab.txt"), "a") as f:
+        f.write("".join(t + "\n" for t in known))
+    open(gpath, "w").write("\n".join(lines) + "\n")
+    if os.path.exists(cpath):
+        d["words_and_labels"] = [x for x in d.get("words_and_labels", []) if x["term"] in unknown]
+        json.dump(d, open(cpath, "w"), indent=1)
+    log(run, f"glossary: PI settled terms; unknown: {', '.join(sorted(unknown)) or 'none'}")
+    print(f"marked {len(known)} candidates known; {len(unknown)} need a glossary row: "
+          + ", ".join(sorted(unknown)))
+
+
 def cmd_known(run, args):
     for t in args:
         t = t.lower().strip()
@@ -449,7 +487,7 @@ def cmd_hook_file(_, __):
 
 
 COMMANDS = {"seed": cmd_seed, "check": cmd_check, "docs": cmd_docs, "known": cmd_known,
-            "candidates": cmd_candidates, "lint": cmd_lint,
+            "candidates": cmd_candidates, "lint": cmd_lint, "settle": cmd_settle,
             "hook-user": cmd_hook_user, "hook-stop": cmd_hook_stop, "hook-file": cmd_hook_file}
 
 

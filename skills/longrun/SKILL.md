@@ -75,10 +75,13 @@ parent, `~/.claude/skills/longrun`.
    - every metric or rule that cannot be executed as written (a missing unit,
      denominator, clipping or tie rule), each with a recommended fix.
    Write the answers into `GOALS.md`, `DECISIONS.md` (provenance `PI`) and `STATE.md`.
-4. **Settle the vocabulary.** Write every term in `glossary_candidates.json` into
-   `GLOSSARY.md` with a draft gloss and status `proposed`. Ask the PI to change the status
-   of each term the PI already knows to `known`, at the PI's pace; the run does not wait.
-   Done when `termcheck.py lint` passes and no candidate is missing from the glossary.
+4. **Settle the vocabulary.** Show the PI the terms in `glossary_candidates.json` as one
+   comma-separated list and ask for the ones the PI does not know. Word frequency cannot
+   predict this: on one project the PI knew 187 of 199 candidates, and the unknown ones
+   ranged from Zipf 0 to 2.9. Run `termcheck.py settle --unknown <terms>`: every other
+   candidate becomes the PI's word. Write a `GLOSSARY.md` row with a gloss for each
+   unknown term. The run does not wait for the answer. Done when the PI has answered,
+   `settle` has run, and `termcheck.py lint` passes.
 5. **Plan.** Run `orchestrate` step 1. Brief the planner with `GOALS.md`,
    `DECISIONS.md` and the horizon. Every chunk cites the ledger rows it serves. The plan
    fits the horizon and produces a first measured result inside the first day, on a
@@ -113,6 +116,9 @@ for a first pass): register the name the first time it names something.
   does not use the term, origin `PI doc`, `agent` or `field`, status `proposed`.
 - The Stop hook catches rare words and coined labels such as `p16_sv`. It cannot catch
   an ordinary word used as a name; that rule is yours, and the auditor checks it.
+- Most flagged terms are ones the PI knows. Register each anyway, with status
+  `proposed`. At each milestone, show the PI the new `proposed` terms as one list, ask for
+  the unknown ones, and run `settle --unknown <terms>`; the rest become `known`.
 - Text for the PI uses glossary terms and plain words; chunk ids, kit ids and dataset
   version codes stay in the plan and the log.
 
