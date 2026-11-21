@@ -12,6 +12,8 @@ for f in GOALS.md DECISIONS.md STATE.md GLOSSARY.md LOG.md; do
   if [[ -e "$root/.longrun/$f" ]]; then echo "kept $f"; else cp "$here/../templates/$f" "$root/.longrun/$f"; echo "created $f"; fi
 done
 if [[ -e "$root/.longrun/config" ]]; then echo "kept config"; else
-  printf 'protected=%s\njob_prefix=%s\ncluster_exec=%s\n' "$prot" "$prefix" "$exec_cmd" > "$root/.longrun/config"; echo "created config"
+  printf 'protected=%s\njob_prefix=%s\ncluster_exec=%s\npi_files=\n' "$prot" "$prefix" "$exec_cmd" > "$root/.longrun/config"; echo "created config"
 fi
+py="$HOME/.claude/longrun-venv/bin/python"; [[ -x "$py" ]] || py=/usr/bin/python3
+if [[ ! -s "$root/.longrun/pi_vocab.txt" ]]; then (cd "$root" && "$py" "$here/termcheck.py" seed); fi
 "$here/log.sh" --root "$root" "longrun initialized (protected=$prot, job_prefix=$prefix)"

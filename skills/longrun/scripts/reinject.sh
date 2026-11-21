@@ -11,7 +11,7 @@ caps() { local f="$1" cap="$2" n; [[ -f "$L/$f" ]] || return 0; n=$(wc -c < "$L/
   echo "This session is a longrun run. Its memory is in $L/. The context was just compacted or resumed; the files below are the current record."
   echo
   echo "== STATE.md =="
-  head -c 5200 "$L/STATE.md" 2>/dev/null
+  head -c 4200 "$L/STATE.md" 2>/dev/null
   echo
   echo "== Open P0 and P1 rows of GOALS.md =="
   grep -E '^\| *G?[A-Za-z0-9._-]+ *\| *P[01] *\|' "$L/GOALS.md" 2>/dev/null \
@@ -20,6 +20,10 @@ caps() { local f="$1" cap="$2" n; [[ -f "$L/$f" ]] || return 0; n=$(wc -c < "$L/
   echo "== Decisions in force (DECISIONS.md, ID and decision only) =="
   grep -E '^\| *[A-Za-z]*[0-9]+ *\|' "$L/DECISIONS.md" 2>/dev/null | grep -vi 'superseded' \
     | awk -F'|' '{gsub(/^ +| +$/,"",$2); gsub(/^ +| +$/,"",$3); print $2": "$3}' | cut -c1-160 | head -c 1500
+  echo
+  echo "== Newest glossary rows (GLOSSARY.md) =="
+  grep -E '^\| *[^-| ][^|]*\|' "$L/GLOSSARY.md" 2>/dev/null | grep -viE '^\| *term *\|' | tail -25 \
+    | awk -F'|' '{gsub(/^ +| +$/,"",$2); gsub(/^ +| +$/,"",$3); print $2": "$3}' | cut -c1-120 | head -c 1600
   echo
   caps STATE.md 5120; caps DECISIONS.md 10240
   echo "Full files: $L/GOALS.md, $L/DECISIONS.md, $L/STATE.md, $L/GLOSSARY.md, $L/LOG.md. The longrun skill holds the operating rules; the longrun-auditor agent audits coverage after a compaction."
