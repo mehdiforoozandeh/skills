@@ -26,9 +26,12 @@ Report on these five checks, each one exhaustive:
 2. **Effort by tier.** From `LOG.md` and `git log` since the last audit, estimate the
    share of work (commits, chunks, compute where logged) per tier, plus work citing no
    row. Name the largest piece of work that serves no P0 or P1 row.
-3. **Terms.** Every term, metric name or label in text meant for the PI (reports,
-   decks, `STATE.md` asks, `GLOSSARY.md` itself) that is absent from both the
-   constitution and `GLOSSARY.md`. Grep the constitution for each before you list it.
+3. **Terms.** Run `~/.claude/longrun-venv/bin/python ~/.claude/skills/longrun/scripts/termcheck.py
+   candidates --since <date of the last audit>` from the repo root. It lists repeated
+   phrases the PI never typed. Judge each: is it an ordinary word or phrase used as the
+   name of a specific thing in this run ("oracle floor", "replicate ladder", "return slip")?
+   List every such name that has no `GLOSSARY.md` row. Also run `termcheck.py lint` and
+   report its problems, and give the count of rows with status `proposed`.
 4. **Contradictions.** Work, code or text that contradicts a decision in force, and
    decisions in force that contradict a later PI message in `LOG.md` or a newer
    decision without a `superseded` mark.

@@ -31,9 +31,10 @@ too.
 | `GOALS.md` | The requirements ledger: one row per requirement in the PI's docs, with tier, status and evidence. | none |
 | `DECISIONS.md` | Decisions in force, one table row each, with verbatim source, provenance and what each supersedes. | 10 KB |
 | `STATE.md` | The state page: the goal now, what is in flight, the next 3 steps, the open asks to the PI. | 5 KB |
-| `GLOSSARY.md` | Every term and metric in use, with a gloss of 10 words or fewer and its origin. | none |
+| `GLOSSARY.md` | Every term in use that the PI did not type and that is not ordinary English, with a gloss, origin and status. Persistent for the project. | none |
+| `pi_vocab.txt`, `pi_phrases.txt` | Every word and two-word phrase the PI typed, in any session. Maintained by a hook. | none |
 | `LOG.md` | Append-only events, written only by `scripts/log.sh`, which stamps the clock. | 60 KB, rotates |
-| `config` | `protected=` (the PI's instructions folder), `job_prefix=`, `cluster_exec=`. | |
+| `config` | `protected=` (the PI's instructions folder), `job_prefix=`, `cluster_exec=`, `pi_files=` (comma-separated globs of files written for the PI). | |
 
 Hooks (installed globally, active only where `.longrun/` exists):
 - After each compaction or resume, `scripts/reinject.sh` prints the state page, the open
@@ -41,6 +42,11 @@ Hooks (installed globally, active only where `.longrun/` exists):
 - Before each compaction, `scripts/precompact.sh` supplies the summary instructions.
 - `scripts/guard.sh` denies Edit and Write on the `protected=` folder. The PI's
   documents are the constitution: the agent proposes a diff and the PI applies it.
+- `scripts/termcheck.py` (run by the hooks with `~/.claude/longrun-venv/bin/python`)
+  checks vocabulary. `UserPromptSubmit` adds the PI's typed words to `pi_vocab.txt`.
+  `Stop` checks each reply and sends it back once when it uses an unregistered term.
+  `PostToolUse` checks `STATE.md`, the files matched by `pi_files=` in `config`, and
+  every edit of `GLOSSARY.md` against the entry rules.
 
 Scripts live in this skill's `scripts/` folder. `<skill>` below means that folder's
 parent, `~/.claude/skills/longrun`.
@@ -51,7 +57,9 @@ parent, `~/.claude/skills/longrun`.
    relative to the repo root> <job prefix> [cluster exec]`. The job prefix is a short
    name that every cluster job of this run starts with (for example `myrun_`). The
    cluster exec is the command that runs a command on the cluster, for example
-   `hpc run`. Done when `.longrun/` holds all six files.
+   `hpc run`. It also seeds `pi_vocab.txt` from every message the PI typed in Claude Code
+   and writes `glossary_candidates.json`: the terms in the instructions folder that the
+   PI never typed. Done when `.longrun/` holds all its files.
 2. **Build the ledger.** Spawn one reader agent (dispatch: Read lane) with the
    instructions folder. It writes nothing; it returns ledger rows. One row per sentence
    that asks for something: every end goal, deliverable, named ablation, metric,
@@ -67,7 +75,11 @@ parent, `~/.claude/skills/longrun`.
    - every metric or rule that cannot be executed as written (a missing unit,
      denominator, clipping or tie rule), each with a recommended fix.
    Write the answers into `GOALS.md`, `DECISIONS.md` (provenance `PI`) and `STATE.md`.
-4. **Plan.** Run `orchestrate` step 1. Brief the planner with `GOALS.md`,
+4. **Settle the vocabulary.** Write every term in `glossary_candidates.json` into
+   `GLOSSARY.md` with a draft gloss and status `proposed`. Ask the PI to change the status
+   of each term the PI already knows to `known`, at the PI's pace; the run does not wait.
+   Done when `termcheck.py lint` passes and no candidate is missing from the glossary.
+5. **Plan.** Run `orchestrate` step 1. Brief the planner with `GOALS.md`,
    `DECISIONS.md` and the horizon. Every chunk cites the ledger rows it serves. The plan
    fits the horizon and produces a first measured result inside the first day, on a
    cheap proxy if the full scorer is not ready.
@@ -90,9 +102,19 @@ row. A decision that changes an earlier one marks the earlier row `superseded by
 A choice that contradicts a decision in force is a question to the PI, never a quiet
 deviation.
 
-**Terms.** A new term or metric enters `GLOSSARY.md` before its first use in anything
-the PI reads, with its origin. Text for the PI uses glossary terms and plain words;
-chunk ids, kit ids and dataset version codes stay in the plan and the log.
+**Terms.** The PI's vocabulary is what the PI typed. Instruction documents do not count,
+because agents help draft them. A term that is neither the PI's, nor registered, nor
+ordinary English needs a `GLOSSARY.md` row before its first use in anything the PI reads,
+or a conventional term the PI uses instead. This holds for field terms too: "pileup" and
+"autoencoder" are standard, and the PI still wanted them registered. It holds most of all
+for an ordinary word used as a new name ("oracle floor", "replicate ladder", "screening"
+for a first pass): register the name the first time it names something.
+- Row rules: one row per concept, one term per concept, a gloss of 1 to 10 words that
+  does not use the term, origin `PI doc`, `agent` or `field`, status `proposed`.
+- The Stop hook catches rare words and coined labels such as `p16_sv`. It cannot catch
+  an ordinary word used as a name; that rule is yours, and the auditor checks it.
+- Text for the PI uses glossary terms and plain words; chunk ids, kit ids and dataset
+  version codes stay in the plan and the log.
 
 **Probe, then batch.** Before submitting N jobs of a kind, run one at real scale and
 read its time, peak memory and output. Set limits from the measurement. Check the
