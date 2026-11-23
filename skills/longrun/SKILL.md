@@ -31,7 +31,7 @@ too.
 | `GOALS.md` | The requirements ledger: one row per requirement in the PI's docs, with tier, status and evidence. | none |
 | `DECISIONS.md` | Decisions in force, one table row each, with verbatim source, provenance and what each supersedes. | 10 KB |
 | `STATE.md` | The state page: the goal now, what is in flight, the next 3 steps, the open asks to the PI. | 5 KB |
-| `GLOSSARY.md` | Every term in use that the PI has not used and that is not ordinary English, with a gloss, origin and status. Persistent for the project. | none |
+| `GLOSSARY.md` | Field terms the PI has not used, admitted by `termcheck.py propose` with a gloss and source, and the terms it rejected. Written only by the script. Persistent for the project. | none |
 | `pi_vocab.txt`, `pi_phrases.txt` | Every word and two-word phrase the PI typed in chat, in any session. Maintained by a hook. Words in the instructions folder count as the PI's too, read live. | none |
 | `LOG.md` | Append-only events, written only by `scripts/log.sh`, which stamps the clock. | 60 KB, rotates |
 | `config` | `protected=` (the PI's instructions folder), `job_prefix=`, `cluster_exec=`, `pi_files=` (comma-separated globs of files written for the PI). | |
@@ -41,12 +41,17 @@ Hooks (installed globally, active only where `.longrun/` exists):
   P0 and P1 rows, and the decisions in force.
 - Before each compaction, `scripts/precompact.sh` supplies the summary instructions.
 - `scripts/guard.sh` denies Edit and Write on the `protected=` folder. The PI's
-  documents are the constitution: the agent proposes a diff and the PI applies it.
+  documents are the constitution: the agent proposes a diff and the PI applies it. It
+  also denies direct writes (Edit, Write, or a writing Bash command) to `GLOSSARY.md`,
+  `pi_vocab.txt` and `pi_phrases.txt`; only `termcheck.py` writes those.
 - `scripts/termcheck.py` (run by the hooks with `~/.claude/longrun-venv/bin/python`)
   checks vocabulary. `UserPromptSubmit` adds the PI's typed words to `pi_vocab.txt`.
-  `Stop` checks each reply and sends it back once when it uses an unregistered term.
-  `PostToolUse` checks `STATE.md`, the files matched by `pi_files=` in `config`, and
-  every edit of `GLOSSARY.md` against the entry rules.
+  `Stop` checks each reply and blocks it while it uses a term that is not admitted;
+  the follow-up correction may repeat the terms it corrects.
+  `PostToolUse` checks `STATE.md` and the files matched by `pi_files=` in `config`.
+  `termcheck.py propose` admits or rejects a term with no LLM and no PI step (see Terms).
+  It reads MeSH and Papers with Code lists in `~/.claude/longrun-data`, which `init.sh`
+  fetches once, and caches its Europe PMC and OpenAlex title counts there.
 
 Scripts live in this skill's `scripts/` folder. `<skill>` below means that folder's
 parent, `~/.claude/skills/longrun`.
@@ -97,21 +102,24 @@ row. A decision that changes an earlier one marks the earlier row `superseded by
 A choice that contradicts a decision in force is a question to the PI, never a quiet
 deviation.
 
-**Terms.** The PI's vocabulary is every word the PI typed in chat or wrote in the
-instructions folder. A term that is neither the PI's, nor registered, nor ordinary English
-needs a `GLOSSARY.md` row before its first use in anything the PI reads, or a term the PI
-uses instead. Field terms get no exemption: being standard in the field does not make a
-term the PI's. Most of all, register an ordinary word used as a new name ("oracle floor",
-"replicate ladder", "screening" for a first pass) the first time it names something.
-- Row rules: one row per concept, one term per concept, a gloss of 1 to 10 words that
-  does not use the term, origin `PI doc`, `agent` or `field`, status `proposed`.
-- The Stop hook catches rare words and coined labels such as `p16_sv`. It cannot catch
-  an ordinary word used as a name; that rule is yours, and the auditor checks it.
-- Many flagged terms are ones the PI knows; word frequency cannot predict which. Register
-  each anyway, with status `proposed`. At each milestone, show the PI the new `proposed`
-  terms as one comma-separated list, ask for the unknown ones, and run
-  `termcheck.py settle --unknown <terms>`; the rest become `known`.
-- Text for the PI uses glossary terms and plain words; chunk ids, kit ids and dataset
+**Terms.** Do not coin terms. The PI's vocabulary is every word the PI typed in chat or
+wrote in the instructions folder. In text the PI reads, use the PI's words, ordinary
+English, or an established field term the glossary admitted. Everything else, including
+any name you or another agent made up, is said in plain words, every time.
+- To use a field term the PI never used, run
+  `termcheck.py propose "<term>" "<gloss of 1 to 10 words without the term>"` once.
+  The script admits a real word (one wordfreq knows), a name MeSH or Papers with Code
+  lists, or a term at least 10 paper titles contain. It rejects invented words, phrases
+  made of ordinary words ("oracle floor"), and snake_case labels such as `p16_sv`. Its
+  ruling is final; you cannot edit `GLOSSARY.md` or the vocabulary files. An admitted
+  real word in a new sense ("rung" for a replicate level) still needs its gloss: gloss
+  every admitted term the first time the PI reads it.
+- A term becomes the PI's only when the PI types it. Never ask the PI to approve a term.
+- When the Stop hook flags a reply, the PI has already read it: send one short
+  correction line ("'X' above means ..."), not a rewrite. Fix a flagged file by editing it.
+- The hook cannot catch an ordinary word used as a new name ("oracle floor",
+  "replicate ladder", "screening" for a first pass). Avoid them; the auditor checks.
+- Text for the PI uses admitted glossary terms and plain words; chunk ids, kit ids and dataset
   version codes stay in the plan and the log.
 
 **Probe, then batch.** Before submitting N jobs of a kind, run one at real scale and

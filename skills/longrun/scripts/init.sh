@@ -16,4 +16,5 @@ if [[ -e "$root/.longrun/config" ]]; then echo "kept config"; else
 fi
 py="$HOME/.claude/longrun-venv/bin/python"; [[ -x "$py" ]] || py=/usr/bin/python3
 if [[ ! -s "$root/.longrun/pi_vocab.txt" ]]; then (cd "$root" && "$py" "$here/termcheck.py" seed); fi
+if [[ ! -s "$HOME/.claude/longrun-data/mesh.txt" ]]; then "$py" "$here/termcheck.py" fetch-lists || echo "init.sh: fetch-lists failed; propose will rely on title counts"; fi
 "$here/log.sh" --root "$root" "longrun initialized (protected=$prot, job_prefix=$prefix)"
