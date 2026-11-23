@@ -2,29 +2,37 @@
 """termcheck: flag terms an agent introduces that the PI has not used and that the
 glossary does not register.
 
-A term is the PI's when the PI typed it in chat (pi_vocab.txt, pi_phrases.txt), wrote it
-in the instruction folder (protected= in .longrun/config, read live), or confirmed it as
-known.
+A term is the PI's when the PI typed it in chat (pi_vocab.txt, pi_phrases.txt) or wrote it
+in the instruction folder (protected= in .longrun/config, read live).
 
 Rules, in order, for each word of prose (code spans, paths, URLs and numbers skipped):
-  1. known: the word or its stem is in pi_vocab.txt, or in a GLOSSARY.md term;
-  2. ordinary English: wordfreq Zipf >= ZIPF (default 3.5);
-  3. otherwise flagged ("rare").
+  1. the PI's: the word or its stem is in pi_vocab.txt;
+  2. admitted: the word is a GLOSSARY.md term with status admitted (a phrase term unlocks
+     only as the whole phrase);
+  3. ordinary English: wordfreq Zipf >= ZIPF (default 3.5);
+  4. otherwise flagged ("rare"; "rejected" if the glossary rejected it).
 Coined labels (letters mixed with digits, or snake_case) in prose are flagged unless they
-are the PI's or registered. Accessions, hashes, chromosome and histone-mark names pass.
+are the PI's. Accessions, hashes, chromosome and histone-mark names pass.
 Ordinary words used as a new name ("oracle floor") cannot be told apart from plain
 phrases by counts alone (measured on a 7-day run). The check therefore only counts
 phrases; `candidates` lists the repeated ones for the auditor to judge.
 
+Admission has no LLM and no PI step. `propose` admits a term only when it is an
+established field term: listed in MeSH or Papers with Code methods (fetch-lists), or,
+for a phrase or a word rarer than TITLE_ZIPF, found in at least TITLE_MIN paper titles
+(Europe PMC phrase search; OpenAlex too for single words). Everything else is a coinage and is rejected; the agent uses plain
+words or the PI's word instead. Agents cannot write GLOSSARY.md or the vocab files
+directly (guard.sh).
+
 Commands (run with the longrun venv python):
   seed [--before ISO]        add the PI's typed words from all Claude Code transcripts
-  known <term>...            mark terms as the PI's (no glossary row needed)
+  fetch-lists                download MeSH and Papers with Code names to LISTS_DIR
+  propose <term> <gloss>     admit or reject a term and record the GLOSSARY.md row
   check [--file F] [--count] print flagged terms for text on stdin or in F, as JSON
   candidates [--since ISO]   repeated phrases the PI never typed, for the auditor
   lint                       check GLOSSARY.md rows against the entry rules
-  settle --unknown <t>...    the PI names unknown terms; all other open candidates become known
   hook-user                  UserPromptSubmit hook: add the typed prompt to pi_vocab
-  hook-stop                  Stop hook: check the reply; block once, then log
+  hook-stop                  Stop hook: check the reply; block until it is corrected
   hook-file                  PostToolUse hook: check files meant for the PI
 """
 import glob
@@ -37,7 +45,13 @@ import time
 
 ZIPF = float(os.environ.get("LONGRUN_ZIPF", "3.5"))
 PHRASE_N = int(os.environ.get("LONGRUN_PHRASE_N", "5"))
+TITLE_MIN = int(os.environ.get("LONGRUN_TITLE_MIN", "10"))
+# A word this common in English ("rung", "strata") is too polysemous for a title search;
+# only the curated lists can admit it. Measured: rung 3.2, strata 3.25; pileup 2.3.
+TITLE_ZIPF = float(os.environ.get("LONGRUN_TITLE_ZIPF", "3.0"))
+LISTS_DIR = os.path.expanduser(os.environ.get("LONGRUN_LISTS", "~/.claude/longrun-data"))
 HERE = os.path.dirname(os.path.abspath(__file__))
+OPEN = ("admitted", "approved", "known")     # statuses that unlock a term (last two: old rows)
 
 STOP = set("""a about above after again against all also am an and any are as at be because been
 before being below between both but by can could did do does doing done down during each either
@@ -103,6 +117,12 @@ def stems(w):
     return out
 
 
+def phrase_re(t):
+    """Regex for a phrase term, matching space or hyphen joins and a plural s."""
+    parts = re.split(r"[\s-]+", t.strip())
+    return r"\b" + r"[\s-]+".join(re.escape(p) for p in parts) + r"s?\b"
+
+
 def clauses(text):
     """Split prose into runs without punctuation, so phrases never cross a comma."""
     return re.split(r"[.,;:!?()\[\]{}\"|*#>\n—–]+", text)
@@ -141,10 +161,9 @@ class Run:
         self.dir = os.path.join(root, ".longrun")
         self.vocab = self._lines("pi_vocab.txt")
         self.pi_phrases = self._lines("pi_phrases.txt")
-        self.gloss_terms = self._glossary()
-        self.gloss_words = set()
-        for t in self.gloss_terms:
-            self.gloss_words |= set(words(t))
+        rows = self._glossary()
+        self.gloss_terms = {t for t, s in rows.items() if s in OPEN}
+        self.rejected = {t for t, s in rows.items() if s == "rejected"}
         p = os.path.join(self.dir, "term_counts.json")
         self.counts = json.load(open(p)) if os.path.exists(p) else {}
         self.doc_labels = self._doc_vocab()
@@ -172,16 +191,16 @@ class Run:
 
     def _glossary(self):
         p = os.path.join(self.dir, "GLOSSARY.md")
-        terms = set()
+        terms = {}
         if not os.path.exists(p):
             return terms
         for line in open(p):
             cells = [c.strip() for c in line.strip().strip("|").split("|")]
-            if len(cells) < 2 or not line.startswith("|") or set(cells[0]) <= set("-: "):
+            if len(cells) < 4 or not line.startswith("|") or set(cells[0]) <= set("-: "):
                 continue
             if cells[0].lower() in ("term",):
                 continue
-            terms.add(cells[0].strip("`*").lower())
+            terms[cells[0].strip("`*").lower()] = cells[3].lower()
         return terms
 
     def add_words(self, text):
@@ -202,7 +221,7 @@ class Run:
 
     def known_word(self, w):
         s = stems(w)
-        return bool(s & self.vocab) or bool(s & self.gloss_words)
+        return bool(s & self.vocab) or bool(s & self.gloss_terms)
 
     def known_phrase(self, p):
         if p in self.pi_phrases or p in self.gloss_terms:
@@ -231,6 +250,9 @@ def check(run, text, reply_id=None):
     """Return flagged terms as dicts {term, kind}. With reply_id, update phrase counts."""
     flags = {}
     prose = strip_code(text)
+    for t in run.gloss_terms:                 # an admitted phrase unlocks only as a whole
+        if " " in t or "-" in t:
+            prose = re.sub(phrase_re(t), " ", prose, flags=re.I)
     for m in LABEL.finditer(prose):
         tok = m.group(0)
         if tok.isdigit() or PASS_LABEL.match(tok):
@@ -245,6 +267,12 @@ def check(run, text, reply_id=None):
         if any(zipf(s) >= ZIPF for s in stems(w)):
             continue
         flags.setdefault(w, "rare")
+    for t in list(flags):
+        if stems(t) & run.rejected:
+            flags[t] = "rejected"
+    for t in run.rejected:
+        if (" " in t or "-" in t) and re.search(phrase_re(t), prose, re.I):
+            flags[t] = "rejected"
     if reply_id:
         day = time.strftime("%Y-%m-%d", time.gmtime())
         for p in phrases(text):
@@ -258,10 +286,15 @@ def check(run, text, reply_id=None):
 
 def message(flags, where):
     terms = ", ".join(f"{f['term']} ({f['kind']})" for f in flags)
-    return (f"Glossary check on {where}: these terms are neither the PI's words nor registered "
-            f"in .longrun/GLOSSARY.md: {terms}. For each, either add a GLOSSARY.md row "
-            f"(term, gloss of 10 words or fewer that does not use the term, origin, status "
-            f"proposed, first use) or replace it with a conventional term the PI uses.")
+    py = "~/.claude/longrun-venv/bin/python ~/.claude/skills/longrun/scripts/termcheck.py"
+    return (f"Glossary check on {where}: these terms are neither the PI's words nor admitted "
+            f"in .longrun/GLOSSARY.md: {terms}. For a term you believe is an established field "
+            f"term (not one you or another agent coined), run `{py} propose \"<term>\" "
+            f"\"<gloss of 1-10 words without the term>\"` once. If it is admitted, "
+            f"gloss it for the PI. For every other term, including rejected ones and labels, "
+            f"say it in plain words or in the PI's own words, and do not use it again in text "
+            f"for the PI. Fix a reply with one short correction line, not a rewrite; fix a "
+            f"file by editing it.")
 
 
 def log(run, text):
@@ -336,9 +369,9 @@ def lint(run):
         if term in seen:
             out.append(f"line {n}: '{term}' is registered twice")
         seen.add(term)
-        if status not in ("proposed", "approved", "known"):
-            out.append(f"line {n}: status '{status}' must be proposed, approved or known")
-        if status == "known":
+        if status not in OPEN + ("rejected",):
+            out.append(f"line {n}: status '{status}' must be admitted or rejected")
+        if status in ("known", "rejected"):
             continue
         nw = len(gloss.split())
         if nw == 0 or nw > 10:
@@ -354,35 +387,176 @@ def cmd_lint(run, args):
     sys.exit(1 if probs else 0)
 
 
-def cmd_settle(run, args):
-    """The PI names the terms they do not know; every other GLOSSARY.md row with status
-    proposed becomes known."""
-    unknown = set(a.lower().strip(",") for a in args if a != "--unknown")
+def norm(t):
+    return re.sub(r"[\s-]+", " ", t.strip().lower().strip(" `*\"'"))
+
+
+_lists = None
+
+
+def field_lists():
+    """name -> source, from the files fetch-lists wrote."""
+    global _lists
+    if _lists is None:
+        _lists = {}
+        for src, f in (("MeSH", "mesh.txt"), ("Papers with Code", "pwc_methods.txt")):
+            p = os.path.join(LISTS_DIR, f)
+            if os.path.exists(p):
+                for line in open(p, errors="ignore"):
+                    if line.strip():
+                        _lists.setdefault(norm(line), src)
+    return _lists
+
+
+def in_lists(term):
+    L = field_lists()
+    t = norm(term)
+    parts = t.split(" ")
+    for last in stems(parts[-1]):
+        cand = " ".join(parts[:-1] + [last])
+        if cand in L:
+            return L[cand]
+    return None
+
+
+def title_hits(term, source):
+    """Papers whose title contains the term; cached. None on failure.
+    europepmc matches the exact phrase. openalex covers arXiv but matches words, not phrases
+    ("base view" gave 4,370), so it is asked only about single words."""
+    import urllib.parse
+    import urllib.request
+    cpath = os.path.join(LISTS_DIR, "title_cache.json")
+    cache = json.load(open(cpath)) if os.path.exists(cpath) else {}
+    t = norm(term)
+    key = f"{source}:{t}"
+    if key in cache:
+        return cache[key]
+    if source == "europepmc":
+        url = ("https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&pageSize=1"
+               "&query=" + urllib.parse.quote(f'TITLE:"{t}"'))
+        count = lambda d: d.get("hitCount", 0)
+    else:
+        url = ("https://api.openalex.org/works?per-page=1&select=id&filter=title.search:"
+               + urllib.parse.quote(f'"{t}"'))
+        count = lambda d: d.get("meta", {}).get("count", 0)
+    req = urllib.request.Request(url, headers={"User-Agent": "longrun-termcheck"})
+    for attempt in range(3):
+        try:
+            n = int(count(json.load(urllib.request.urlopen(req, timeout=20))))
+            break
+        except Exception:
+            if attempt == 2:
+                return None
+            time.sleep(2)
+    cache[key] = n
+    os.makedirs(LISTS_DIR, exist_ok=True)
+    json.dump(cache, open(cpath, "w"))
+    return n
+
+
+def judge(term):
+    """(status, origin) for a proposed term. No LLM, no PI step."""
+    t = norm(term)
+    if LABEL.fullmatch(term.strip()) and not PASS_LABEL.match(term.strip()):
+        return "rejected", "label: keep it in code spans"
+    src = in_lists(t)
+    if src:
+        return "admitted", f"field: {src}"
+    if " " in t or zipf(t) < TITLE_ZIPF or zipf(t) == 99.0:
+        srcs = ("europepmc",) if " " in t else ("europepmc", "openalex")
+        hits = {src: title_hits(t, src) for src in srcs}
+        if all(n is None for n in hits.values()):
+            return None, "title lookup failed; use plain words for now and retry later"
+        src, n = max(((k, v or 0) for k, v in hits.items()), key=lambda x: x[1])
+        name = {"europepmc": "Europe PMC", "openalex": "OpenAlex"}[src]
+        if n >= TITLE_MIN:
+            return "admitted", f"field: {name}, {n} titles"
+        return "rejected", f"coinage: {n} titles in " + " and ".join(
+            {"europepmc": "Europe PMC", "openalex": "OpenAlex"}[k] for k in srcs)
+    return "rejected", f"coinage: a common English word (Zipf >= {TITLE_ZIPF}) not listed as a field term"
+
+
+def cmd_propose(run, args):
+    if len(args) != 2:
+        sys.exit('usage: termcheck.py propose "<term>" "<gloss of 1-10 words>"')
+    term, gloss = args[0].strip(), args[1].strip()
+    key = term.lower().strip("`*")
+    rows = run._glossary()
+    if key in rows:
+        print(f"'{term}' is already in GLOSSARY.md with status {rows[key]}")
+        return
+    nw = len(gloss.split())
+    if not 1 <= nw <= 10 or set(words(term)) & set(words(gloss)):
+        sys.exit("the gloss needs 1 to 10 words and must not use the term")
+    status, origin = judge(term)
+    if status is None:
+        print(origin)
+        sys.exit(1)
     gpath = os.path.join(run.dir, "GLOSSARY.md")
-    lines = open(gpath).read().splitlines() if os.path.exists(gpath) else []
-    known = []
-    for i, line in enumerate(lines):
-        cells = [c.strip() for c in line.strip().strip("|").split("|")]
-        if line.startswith("|") and len(cells) >= 4 and cells[3].lower() == "proposed":
-            term = cells[0].strip("`*").lower()
-            if term in unknown:
-                continue
-            cells[3] = "known"
-            lines[i] = "| " + " | ".join(cells) + " |"
-            known.append(term)
-    open(gpath, "w").write("\n".join(lines) + "\n")
-    log(run, f"glossary: PI settled terms; unknown: {', '.join(sorted(unknown)) or 'none'}")
-    print(f"marked {len(known)} proposed rows known; still proposed: " + ", ".join(sorted(unknown)))
+    day = time.strftime("%Y-%m-%d", time.gmtime())
+    with open(gpath, "a") as f:
+        f.write(f"| {term} | {gloss} | {origin} | {status} | {day} |\n")
+    log(run, f"glossary: {status} '{term}' ({origin})")
+    if status == "admitted":
+        print(f"admitted '{term}' ({origin}). Gloss it the first time the PI reads it.")
+    else:
+        print(f"rejected '{term}' ({origin}). Use plain words or the PI's words instead.")
 
 
-def cmd_known(run, args):
-    for t in args:
-        t = t.lower().strip()
-        if " " in t or "-" in t:
-            open(os.path.join(run.dir, "pi_phrases.txt"), "a").write(t + "\n")
-        else:
-            open(os.path.join(run.dir, "pi_vocab.txt"), "a").write(t + "\n")
-    print(f"marked {len(args)} terms as known")
+def cmd_fetch_lists(run, args):
+    """MeSH descriptor names and entry terms, and Papers with Code method names."""
+    import gzip
+    import io
+    import urllib.request
+    import xml.etree.ElementTree as ET
+    os.makedirs(LISTS_DIR, exist_ok=True)
+    year = time.gmtime().tm_year
+    names = set()
+    for y in (year, year - 1):
+        url = f"https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc{y}.gz"
+        try:
+            raw = urllib.request.urlopen(url, timeout=120).read()
+        except Exception:
+            continue
+        for _, el in ET.iterparse(io.BytesIO(gzip.decompress(raw)), events=("end",)):
+            if el.tag in ("DescriptorName", "Term"):
+                s = el.findtext("String")
+                if s:
+                    names.add(s)
+            if el.tag == "DescriptorRecord":
+                el.clear()
+        break
+    open(os.path.join(LISTS_DIR, "mesh.txt"), "w").write("\n".join(sorted(names)) + "\n")
+    print(f"MeSH: {len(names)} names")
+    pwc, off = set(), 0
+    base = ("https://datasets-server.huggingface.co/rows?dataset=pwc-archive/methods"
+            "&config=default&split=train&length=100&offset=")
+    while True:
+        for attempt in range(5):
+            try:
+                d = json.load(urllib.request.urlopen(base + str(off), timeout=60))
+                break
+            except Exception as e:
+                if attempt == 4:
+                    sys.exit(f"Papers with Code fetch failed at row {off}: {e}")
+                time.sleep(5 * 2 ** attempt)
+        for r in d.get("rows", []):
+            x = r["row"]
+            try:
+                npap = int(x.get("num_papers") or 0)
+            except ValueError:
+                npap = 0
+            for k in ("name", "full_name"):
+                v = (x.get(k) or "").strip()
+                if npap >= 2 and v.isascii() and 0 < len(v.split()) <= 6 \
+                        and not re.search(r"[?\[\]@+]|\d{3}", v):
+                    pwc.add(v)
+        off += 100
+        if off >= d.get("num_rows_total", 0):
+            break
+        time.sleep(1.0)
+    open(os.path.join(LISTS_DIR, "pwc_methods.txt"), "w").write("\n".join(sorted(pwc)) + "\n")
+    print(f"Papers with Code: {len(pwc)} names; lists in {LISTS_DIR}")
 
 
 def hook_input():
@@ -410,22 +584,26 @@ def cmd_hook_stop(_, __):
     text = d.get("last_assistant_message") or ""
     if not text.strip():
         return
+    # The PI has already seen a blocked reply, so the fix is a short follow-up. That
+    # follow-up may repeat the terms it corrects; any other flagged term blocks again.
     guard = os.path.join(run.dir, ".termcheck_blocked")
     sid = d.get("session_id", "")
-    blocked_before = os.path.exists(guard) and open(guard).read().strip() == sid
-    flags = check(run, text, None if blocked_before else str(time.time()))
+    prev = {}
+    if os.path.exists(guard):
+        try:
+            prev = json.load(open(guard))
+        except ValueError:
+            prev = {}
+    excused = set(prev.get("terms", [])) if prev.get("sid") == sid else set()
+    flags = [f for f in check(run, text, None if excused else str(time.time()))
+             if f["term"] not in excused]
     run.save_counts()
+    if os.path.exists(guard):
+        os.remove(guard)
     if not flags:
-        if blocked_before:
-            os.remove(guard)
         return
-    if blocked_before or d.get("stop_hook_active"):
-        if os.path.exists(guard):
-            os.remove(guard)
-        log(run, "glossary: reply sent with unregistered terms: " +
-            ", ".join(f["term"] for f in flags))
-        return
-    open(guard, "w").write(sid)
+    json.dump({"sid": sid, "terms": sorted(excused | {f["term"] for f in flags})}, open(guard, "w"))
+    log(run, "glossary: blocked reply with " + ", ".join(f["term"] for f in flags))
     print(json.dumps({"decision": "block", "reason": message(flags, "your last reply")}))
 
 
@@ -459,8 +637,9 @@ def cmd_hook_file(_, __):
         print(json.dumps({"decision": "block", "reason": message(flags, rel)}))
 
 
-COMMANDS = {"seed": cmd_seed, "check": cmd_check, "known": cmd_known,
-            "candidates": cmd_candidates, "lint": cmd_lint, "settle": cmd_settle,
+COMMANDS = {"seed": cmd_seed, "check": cmd_check, "propose": cmd_propose,
+            "fetch-lists": cmd_fetch_lists,
+            "candidates": cmd_candidates, "lint": cmd_lint,
             "hook-user": cmd_hook_user, "hook-stop": cmd_hook_stop, "hook-file": cmd_hook_file}
 
 
@@ -474,6 +653,9 @@ def main():
             COMMANDS[cmd](None, sys.argv[2:])
         except Exception as e:            # a hook must never break the session
             sys.stderr.write(f"termcheck {cmd}: {e}\n")
+        return
+    if cmd == "fetch-lists":
+        COMMANDS[cmd](None, sys.argv[2:])
         return
     root = find_root(os.getcwd())
     if not root:
