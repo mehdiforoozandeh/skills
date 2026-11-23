@@ -108,11 +108,12 @@ English, or an established field term the glossary admitted. Everything else, in
 any name you or another agent made up, is said in plain words, every time.
 - To use a field term the PI never used, run
   `termcheck.py propose "<term>" "<gloss of 1 to 10 words without the term>"` once.
-  The script admits it only if MeSH or Papers with Code lists it, or (for a phrase or a
-  rare word) at least 10 paper titles contain it. It rejects everything else, including
-  common words used as names ("rung", "strata") and labels such as `p16_sv`. Its ruling
-  is final; you cannot edit `GLOSSARY.md` or the vocabulary files. Gloss an admitted term
-  the first time the PI reads it.
+  The script admits a real word (one wordfreq knows), a name MeSH or Papers with Code
+  lists, or a term at least 10 paper titles contain. It rejects invented words, phrases
+  made of ordinary words ("oracle floor"), and snake_case labels such as `p16_sv`. Its
+  ruling is final; you cannot edit `GLOSSARY.md` or the vocabulary files. An admitted
+  real word in a new sense ("rung" for a replicate level) still needs its gloss: gloss
+  every admitted term the first time the PI reads it.
 - A term becomes the PI's only when the PI types it. Never ask the PI to approve a term.
 - When the Stop hook flags a reply, the PI has already read it: send one short
   correction line ("'X' above means ..."), not a rewrite. Fix a flagged file by editing it.

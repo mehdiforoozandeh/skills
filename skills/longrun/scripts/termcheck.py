@@ -18,9 +18,11 @@ phrases by counts alone (measured on a 7-day run). The check therefore only coun
 phrases; `candidates` lists the repeated ones for the auditor to judge.
 
 Admission has no LLM and no PI step. `propose` admits a term only when it is an
-established field term: listed in MeSH or Papers with Code methods (fetch-lists), or,
-for a phrase or a word rarer than TITLE_ZIPF, found in at least TITLE_MIN paper titles
-(Europe PMC phrase search; OpenAlex too for single words). Everything else is a coinage and is rejected; the agent uses plain
+established term: listed in MeSH or Papers with Code methods (fetch-lists), a single
+word wordfreq knows (Zipf >= WORD_ZIPF), or found in at least TITLE_MIN paper titles (Europe PMC phrase search; OpenAlex too for
+single words). snake_case labels are always rejected. Frequency cannot tell a known word
+used in a new sense ("rung") from its usual sense, so such a word is admitted with its
+gloss; the gloss is what tells the PI the meaning. Everything else is a coinage and is rejected; the agent uses plain
 words or the PI's word instead. Agents cannot write GLOSSARY.md or the vocab files
 directly (guard.sh).
 
@@ -46,9 +48,9 @@ import time
 ZIPF = float(os.environ.get("LONGRUN_ZIPF", "3.5"))
 PHRASE_N = int(os.environ.get("LONGRUN_PHRASE_N", "5"))
 TITLE_MIN = int(os.environ.get("LONGRUN_TITLE_MIN", "10"))
-# A word this common in English ("rung", "strata") is too polysemous for a title search;
-# only the curated lists can admit it. Measured: rung 3.2, strata 3.25; pileup 2.3.
-TITLE_ZIPF = float(os.environ.get("LONGRUN_TITLE_ZIPF", "3.0"))
+# wordfreq knows real words down to Zipf ~1 (reran 1.5, autoencoder 1.1); every coined
+# token in a 7-day replay scored 0.0 (slotwise, sysvi, tagalign, mergeable).
+WORD_ZIPF = float(os.environ.get("LONGRUN_WORD_ZIPF", "1.0"))
 LISTS_DIR = os.path.expanduser(os.environ.get("LONGRUN_LISTS", "~/.claude/longrun-data"))
 HERE = os.path.dirname(os.path.abspath(__file__))
 OPEN = ("admitted", "approved", "known")     # statuses that unlock a term (last two: old rows)
@@ -457,23 +459,22 @@ def title_hits(term, source):
 def judge(term):
     """(status, origin) for a proposed term. No LLM, no PI step."""
     t = norm(term)
-    if LABEL.fullmatch(term.strip()) and not PASS_LABEL.match(term.strip()):
+    if "_" in term:
         return "rejected", "label: keep it in code spans"
     src = in_lists(t)
     if src:
         return "admitted", f"field: {src}"
-    if " " in t or zipf(t) < TITLE_ZIPF or zipf(t) == 99.0:
-        srcs = ("europepmc",) if " " in t else ("europepmc", "openalex")
-        hits = {src: title_hits(t, src) for src in srcs}
-        if all(n is None for n in hits.values()):
-            return None, "title lookup failed; use plain words for now and retry later"
-        src, n = max(((k, v or 0) for k, v in hits.items()), key=lambda x: x[1])
-        name = {"europepmc": "Europe PMC", "openalex": "OpenAlex"}[src]
-        if n >= TITLE_MIN:
-            return "admitted", f"field: {name}, {n} titles"
-        return "rejected", f"coinage: {n} titles in " + " and ".join(
-            {"europepmc": "Europe PMC", "openalex": "OpenAlex"}[k] for k in srcs)
-    return "rejected", f"coinage: a common English word (Zipf >= {TITLE_ZIPF}) not listed as a field term"
+    if " " not in t and 99.0 > zipf(t) >= WORD_ZIPF:
+        return "admitted", f"English word, Zipf {zipf(t):.1f}"
+    srcs = ("europepmc",) if " " in t else ("europepmc", "openalex")
+    hits = {src: title_hits(t, src) for src in srcs}
+    if all(n is None for n in hits.values()):
+        return None, "title lookup failed; use plain words for now and retry later"
+    src, n = max(((k, v or 0) for k, v in hits.items()), key=lambda x: x[1])
+    name = {"europepmc": "Europe PMC", "openalex": "OpenAlex"}
+    if n >= TITLE_MIN:
+        return "admitted", f"field: {name[src]}, {n} titles"
+    return "rejected", f"coinage: {n} titles in " + " and ".join(name[k] for k in srcs)
 
 
 def cmd_propose(run, args):
