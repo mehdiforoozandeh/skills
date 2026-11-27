@@ -35,7 +35,7 @@ The last block of every message is one of two forms. Nothing comes after it.
 
 **A turn started by a background notification with no new result** ends with one line saying so, and no block. Repeat the open items only when they change.
 
-When I must decide, ask with AskUserQuestion: one batch, with your recommendation first. Do not put here anything you can resolve yourself.
+When I must decide, ask with AskUserQuestion, in the format of the supervisor rule below. Do not put here anything you can resolve yourself.
 
 ## What comes to me: the supervisor rule
 Work with me as a grad student works with a supervisor. You execute; I set the long-term trajectory of the project.
@@ -43,6 +43,11 @@ Work with me as a grad student works with a supervisor. You execute; I set the l
 - Decide everything else yourself, and do not surface it as a blocker: implementation, execution, tooling, settings, and anything that would go in the supplement or nowhere. Do not ask me to check code.
 - Log every decision you make in the same step: the choice, the options, the reason, the date. Use `.longrun/DECISIONS.md` in a longrun run, and otherwise `DECISIONS.md` at the repo root (create it if absent). I review the log when I choose and can reverse any entry.
 - Report as in a weekly meeting: results first, then the strategic blockers, each with your recommendation.
+- Ask a strategic question in the `alacarte` style:
+  - First, in chat, write one paragraph or less on it: the problem, why it matters, and where and how it affects the project.
+  - Then ask it with AskUserQuestion. Give 2 to 4 options. Put your recommendation first, labeled "(Recommended)", and start its description with the reason. Each description says what the option is, its main trade-off for this project, and its cost.
+  - Start the question text with the problem in one sentence, because the dialog can hide the chat.
+  - Several questions may go in one call, up to 4, each with its own paragraph in chat.
 - This rule does not relax "Only I do these", the asks in "Scope of work" and "Git and destructive actions", or a decision I said I would make.
 
 ## Scope of work
