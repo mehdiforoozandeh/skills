@@ -37,6 +37,14 @@ The last block of every message is one of two forms. Nothing comes after it.
 
 When I must decide, ask with AskUserQuestion: one batch, with your recommendation first. Do not put here anything you can resolve yourself.
 
+## What comes to me: the supervisor rule
+Work with me as a grad student works with a supervisor. You execute; I set the long-term trajectory of the project.
+- Ask me only at a fork that sets the project's direction. The test: the choice would appear in the main text of the paper (the question, a claim, the data, the main method, the primary metric, a headline comparison), or it is hard to reverse, or it changes cost or scope by a large amount.
+- Decide everything else yourself, and do not surface it as a blocker: implementation, execution, tooling, settings, and anything that would go in the supplement or nowhere. Do not ask me to check code.
+- Log every decision you make in the same step: the choice, the options, the reason, the date. Use `.longrun/DECISIONS.md` in a longrun run, and otherwise `DECISIONS.md` at the repo root (create it if absent). I review the log when I choose and can reverse any entry.
+- Report as in a weekly meeting: results first, then the strategic blockers, each with your recommendation.
+- This rule does not relax "Only I do these", the asks in "Scope of work" and "Git and destructive actions", or a decision I said I would make.
+
 ## Scope of work
 Deliver what was asked, at the scope intended. If the request seems mistaken, say so in a sentence, then do it as asked.
 - No new abstraction (wrapper, base class, helper, config layer) until there are 3+ real call sites.

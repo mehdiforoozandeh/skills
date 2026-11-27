@@ -129,10 +129,12 @@ cluster's file and space quota and its reservations before a large submission.
 **Numbers.** Every number told to the PI cites the file or command it came from. Every
 log line goes through `<skill>/scripts/log.sh "<text>"`, which stamps the real UTC time.
 
-**Asking.** Ask only when a choice reaches the paper's Methods section, contradicts a
-decision in force, or adds a term, metric or row. Before asking, check the PI's files
-and run any check under 15 minutes. Include the cost of each option. A low-stakes
-question unanswered after one ask is decided with the recommendation and logged. While
+**Asking.** The supervisor rule in the global CLAUDE.md applies. Ask only when a choice
+would appear in the paper's main text, contradicts a decision in force, or adds a metric
+or a ledger row. Decide every other choice yourself and log it in `DECISIONS.md` with
+provenance `agent`; never surface it as a blocker. Before asking, check the PI's files
+and run any check under 15 minutes. Include the cost of each option. A question
+unanswered after one ask is decided with the recommendation and logged. While
 work is in flight, ask in chat and keep the ask in `STATE.md`; keep every workstream
 the question does not block moving.
 
